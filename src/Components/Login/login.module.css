@@ -1,0 +1,10 @@
+.logInWrapper {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logInBtn {
+    margin-top: 24px;
+}

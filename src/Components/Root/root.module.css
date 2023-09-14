@@ -1,0 +1,14 @@
+.root-page {
+    position: relative;
+    display: flex;
+}
+
+.mainContent {
+    width: calc(100% - 312px);
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    min-height: calc(100vh - 16px);
+    margin: 8px;
+    margin-left: auto;
+}

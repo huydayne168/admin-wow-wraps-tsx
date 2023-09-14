@@ -1,0 +1,17 @@
+.dashboardTable h2 {
+    margin-bottom: 32px;
+}
+
+.tableDirection {
+    margin-top: 24px;
+    margin-right: 12px;
+    margin-left: auto;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.tableDirection span {
+    margin-bottom: 2px;
+}

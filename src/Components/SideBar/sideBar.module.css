@@ -1,0 +1,62 @@
+.sideBar {
+    position: fixed;
+    width: 280px;
+    height: calc(100vh - 16px);
+    margin: 8px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    border-radius: 8px;
+}
+
+.header {
+    padding: 6px 12px;
+    border-bottom: 1px solid #666;
+    color: #7451f8;
+    font-weight: 600;
+}
+
+.sideBar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.navCategory {
+    padding: 12px 24px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.navTitles {
+    font-size: 20px;
+    color: #666;
+}
+
+.navCategory button {
+    background-color: transparent;
+    border-radius: 6px;
+    background-color: #7451f8;
+    color: #fff;
+}
+.navCategory a {
+    padding: 4px;
+    text-decoration: none;
+    color: #666;
+    font-size: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    transition: all 300ms ease;
+}
+
+.navCategory a:hover {
+    background-color: #7451f8;
+    color: #fff;
+}
+
+.navCategory a svg {
+    color: currentColor;
+    width: 10%;
+}

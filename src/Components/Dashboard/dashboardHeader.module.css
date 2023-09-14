@@ -1,0 +1,21 @@
+.headerCards {
+    display: flex;
+    gap: 24px;
+    justify-content: space-around;
+}
+
+.headerCard {
+    flex: 1;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.headerCard svg {
+    margin-left: auto;
+    width: 22px;
+    padding: 6px;
+    border-radius: 4px;
+    display: block;
+    text-align: end;
+}

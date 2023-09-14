@@ -1,0 +1,57 @@
+*:focus {
+    outline: none;
+}
+
+.addProduct {
+    padding: 24px;
+}
+
+.addFormContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.heading {
+    font-size: 22px;
+    color: #7451f8;
+    padding: 12px 24px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.addForm {
+    padding: 24px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.addForm form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 120px;
+    row-gap: 12px;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.controls input {
+    padding: 4px;
+    font-size: 14px;
+    color: #333;
+    border: none;
+    border-bottom: 1px solid #333;
+}
+
+.roomControl {
+    grid-column: span 2;
+}
+
+.sendBtn {
+    margin-top: 32px;
+    /* padding: 12px 64px; */
+    justify-self: flex-start;
+    grid-row: 5/6;
+}
