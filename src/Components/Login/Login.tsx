@@ -1,41 +1,49 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import styles from "./login.module.css";
 import http from "../../utils/http";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
+import { authActions } from "../../store/store";
 function Login() {
     const navigate = useNavigate();
-    const userNameRef = useRef();
-    const passwordRef = useRef();
-    const [validate, setValidate] = useState({ state: true, message: "" });
-    // function logInHandler(e) {
-    //     e.preventDefault();
-    //     http.get("/login-admin", {
-    //         params: {
-    //             userName: userNameRef.current.value,
-    //             password: passwordRef.current.value,
-    //         },
-    //     })
-    //         .then((res) => {
-    //             const data = res.data;
-    //             if (data.status === 401) {
-    //                 setValidate({ state: false, message: data.message });
-    //             } else {
-    //                 navigate("/admin/dashboard");
-    //                 setValidate({ state: true, message: data.message });
-    //                 localStorage.setItem(
-    //                     "admin",
-    //                     JSON.stringify({
-    //                         userName: userNameRef.current.vale,
-    //                         password: passwordRef.current.value,
-    //                     })
-    //                 );
-    //             }
-    //         })
-    //         .catch((err) => {
-    //             console.log(err);
-    //         });
-    // }
+    const [emailValue, setEmailValue] = useState("");
+    const [passwordValue, setPasswordValue] = useState("");
+    const [validate, setValidate] = useState({
+        emailErr: "",
+        passwordErr: "",
+    });
+    const dispatch = useAppDispatch();
+    const currentUser = useAppSelector((state: any) => state.authentication);
+    console.log(currentUser);
+
+    const logInHandler = useCallback(() => {
+        async function login() {
+            try {
+                const res = await http.post("/login", {
+                    email: emailValue,
+                    password: passwordValue,
+                });
+                const userInfo = res.data?.userInfo;
+                const accessToken = res.data?.accessToken;
+                dispatch(
+                    authActions.storeUser({
+                        _id: userInfo._id,
+                        accessToken,
+                    })
+                );
+                navigate("/admin/dash-board");
+            } catch (error: any) {
+                if (error instanceof Error) {
+                    setValidate((pre) => {
+                        return { ...pre, ...error.response?.data };
+                    });
+                }
+            }
+        }
+        login();
+    }, [emailValue, passwordValue, dispatch, navigate]);
+
     return (
         <div className={`${styles.logInWrapper} logInPage container`}>
             <div className={` card`} style={{ width: "26rem" }}>
@@ -46,38 +54,54 @@ function Login() {
                     </h6>
                     <div className="form-floating mb-3">
                         <input
-                            type="text"
+                            type="email"
                             className="form-control"
-                            id="floatingInput"
-                            placeholder="Your username"
-                            // ref={userNameRef}
+                            id="email"
+                            name="email"
+                            placeholder="Your email"
+                            value={emailValue}
+                            onChange={(e) => {
+                                setEmailValue(e.target.value);
+                            }}
                         />
-                        <label htmlFor="floatingInput">User Name</label>
+                        <label htmlFor="email">Your Email</label>
                     </div>
+                    {validate.emailErr ? (
+                        <p style={{ color: "red" }} className="mt-2">
+                            {validate.emailErr}
+                        </p>
+                    ) : (
+                        ""
+                    )}
 
                     <div className="form-floating">
                         <input
                             type="password"
                             className="form-control"
-                            id="floatingPassword"
+                            id="password"
                             placeholder="Password"
-                            // ref={passwordRef}
+                            value={passwordValue}
+                            onChange={(e) => {
+                                setPasswordValue(e.target.value);
+                            }}
                         />
-                        <label htmlFor="floatingPassword">Password</label>
+                        <label htmlFor="password">Password</label>
                     </div>
-                    {!validate.state ? (
-                        <p style={{ color: "red" }}>{validate.message}</p>
+                    {validate.passwordErr ? (
+                        <p style={{ color: "red" }} className="mt-2">
+                            {validate.passwordErr}
+                        </p>
                     ) : (
                         ""
                     )}
-                    <p>
+                    <p className="mt-2">
                         Sign up to be an admin?{" "}
                         <Link to={"/sign-up"}>Sign up</Link>
                     </p>
                     <button
                         type="button"
                         className={`${styles.logInBtn} btn btn-primary btn-lg`}
-                        // onClick={logInHandler}
+                        onClick={logInHandler}
                     >
                         Log in
                     </button>
