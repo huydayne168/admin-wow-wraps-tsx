@@ -37,6 +37,11 @@
     gap: 4px;
 }
 
+.controls:last-of-type {
+    grid-row: 4/5;
+    /* grid-column: span 2; */
+}
+
 .controls input {
     padding: 4px;
     font-size: 14px;
@@ -53,5 +58,5 @@
     margin-top: 32px;
     /* padding: 12px 64px; */
     justify-self: flex-start;
-    grid-row: 5/6;
+    grid-row: 6/7;
 }

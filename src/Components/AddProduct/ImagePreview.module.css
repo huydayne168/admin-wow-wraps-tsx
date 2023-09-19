@@ -1,0 +1,14 @@
+.image-preview-comp {
+    padding: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #000;
+    min-height: 280px;
+    grid-column: 2/3;
+}
+
+.preview-image {
+    width: 100%;
+    height: auto;
+}

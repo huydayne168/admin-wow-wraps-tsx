@@ -6,6 +6,8 @@ import { useAppSelector } from "./useStore";
 const usePrivateHttp = () => {
     const currentUser = useAppSelector((state) => state.authentication);
     const refresh = useRefreshToken();
+    console.log(currentUser.accessToken);
+
     useEffect(() => {
         const requestIntercept = privateHttp.interceptors.request.use(
             (config) => {
@@ -21,8 +23,11 @@ const usePrivateHttp = () => {
             (response) => response,
             async (error) => {
                 const prevRequest = error?.config;
+                console.log(prevRequest);
                 if (error?.response?.status === 403 && !prevRequest?.sent) {
                     prevRequest.sent = true;
+                    console.log("okee");
+
                     const newAccessToken = await refresh();
                     prevRequest.headers[
                         "Authorization"
@@ -38,6 +43,8 @@ const usePrivateHttp = () => {
             privateHttp.interceptors.response.eject(responseIntercept);
         };
     }, [currentUser, refresh]);
+
+    return privateHttp;
 };
 
 export default usePrivateHttp; // this hook is used to fetch protected route

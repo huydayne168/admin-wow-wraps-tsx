@@ -15,15 +15,21 @@ function Login() {
     });
     const dispatch = useAppDispatch();
     const currentUser = useAppSelector((state: any) => state.authentication);
-    console.log(currentUser);
 
     const logInHandler = useCallback(() => {
         async function login() {
             try {
-                const res = await http.post("/login", {
-                    email: emailValue,
-                    password: passwordValue,
-                });
+                const res = await http.post(
+                    "/login",
+                    {
+                        email: emailValue,
+                        password: passwordValue,
+                    },
+                    {
+                        headers: { "Content-Type": "application/json" },
+                        withCredentials: true,
+                    }
+                );
                 const userInfo = res.data?.userInfo;
                 const accessToken = res.data?.accessToken;
                 dispatch(

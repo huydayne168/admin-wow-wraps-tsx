@@ -1,13 +1,21 @@
 import http from "../utils/http";
 import { useAppDispatch } from "./useStore";
 import { authActions } from "../store/store";
-const dispatch = useAppDispatch();
+import { log } from "console";
 const useRefreshToken = () => {
+    const dispatch = useAppDispatch();
     const refresh = async function () {
         try {
-            const response = await http.get("/refresh", {
-                withCredentials: true,
-            });
+            console.log(process.env.REACT_APP_DOMAIN + "/refresh");
+
+            const response = await http.get(
+                process.env.REACT_APP_DOMAIN + "/refresh",
+                {
+                    withCredentials: true,
+                }
+            );
+            console.log(response);
+
             dispatch(authActions.storeNewAccessToken(response.data));
         } catch (error) {
             console.log(error);

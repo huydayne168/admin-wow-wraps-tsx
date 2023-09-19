@@ -11,5 +11,5 @@ export type Food = {
     category: string;
     tags: string[];
     reviews: Review[];
-    images: string;
+    image: object;
 };
