@@ -56,6 +56,11 @@
     color: #fff;
 }
 
+.navCategory a.active {
+    background-color: #7451f8;
+    color: #fff;
+}
+
 .navCategory a svg {
     color: currentColor;
     width: 10%;

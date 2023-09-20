@@ -1,9 +1,9 @@
 import { type } from "os";
 import { User } from "./user";
-import { Food } from "./food";
+import { Product } from "./product";
 
 type FoodInCart = {
-    food: Food;
+    food: Product;
     amount: number;
 };
 

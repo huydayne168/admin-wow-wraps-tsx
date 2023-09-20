@@ -1,6 +1,6 @@
 import { type } from "os";
 import { Review } from "./review";
-export type Food = {
+export type Product = {
     name: string;
     _id: string;
     amount: number;

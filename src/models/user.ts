@@ -5,6 +5,6 @@ export type User = {
     userName: string;
     email: string;
     password: string;
-    accessToken: string;
+    refreshToken: string;
     roles: string[];
 };

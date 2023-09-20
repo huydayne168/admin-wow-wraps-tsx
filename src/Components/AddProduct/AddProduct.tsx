@@ -24,10 +24,6 @@ const AddProduct: React.FC = () => {
     const [tagsValue, setTagsValue] = useState("");
     const [image, setImage] = useState<any>("");
 
-    // const allTags = useMemo(() => {
-
-    // })
-
     // fetch all tags:
     useEffect(() => {
         const fetchTags = async () => {

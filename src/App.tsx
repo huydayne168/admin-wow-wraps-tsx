@@ -42,7 +42,7 @@ function App() {
                     element: <Transactions />,
                 },
                 {
-                    path: "add-product/:addType",
+                    path: "add-product",
                     element: <AddProduct />,
                 },
             ],

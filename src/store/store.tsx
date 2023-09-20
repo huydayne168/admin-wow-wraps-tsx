@@ -1,4 +1,20 @@
 import { createSlice, configureStore } from "@reduxjs/toolkit";
+import { Product } from "../models/product";
+
+////// Navigation Slice:
+const navigationInit = "dash-board";
+
+const navigationSlice = createSlice({
+    name: "navigation",
+    initialState: navigationInit,
+    reducers: {
+        setNavigationState(state, action) {
+            return (state = action.payload);
+        },
+    },
+});
+
+export const navigationActions = navigationSlice.actions;
 
 ////// Authentication store:
 const id = localStorage.getItem("currentUserId");
@@ -12,11 +28,7 @@ const authentication = createSlice({
     initialState: authInit,
     reducers: {
         storeUser(state, action) {
-            console.log(action.payload._id);
-            localStorage.setItem(
-                "currentUserId",
-                JSON.stringify(action.payload._id)
-            );
+            localStorage.setItem("currentUserId", action.payload._id);
             return (state = {
                 _id: action.payload._id,
                 accessToken: action.payload.accessToken,
@@ -27,12 +39,20 @@ const authentication = createSlice({
             const newState = { ...state, ...action.payload.accessToken };
             return (state = newState);
         },
+
+        logout(state) {
+            state = {
+                _id: "",
+                accessToken: "",
+            };
+            localStorage.removeItem("currentUserId");
+        },
     },
 });
 
 export const authActions = authentication.actions;
 
-////// Authentication store:
+////// Tags store:
 type TagsSlice = {
     allTags: string[];
     choseTags: string[];
@@ -69,18 +89,45 @@ const tagsSlice = createSlice({
 
 export const tagsActions = tagsSlice.actions;
 
+////// Products store: (this slice is used too manage products and sort products)
+const intiProducts: Product[] = [];
+
+const productsSlice = createSlice({
+    name: "products",
+    initialState: intiProducts,
+    reducers: {
+        getAllProducts(state, action) {
+            return (state = action.payload);
+        },
+
+        sortByRate(state, action) {
+            switch (action.payload) {
+                case "HIGH_RATE":
+                    return state.sort(
+                        (a, b) => Number(a.rate) - Number(b.rate)
+                    );
+                case "LOW_RATE":
+                    return state.sort(
+                        (a, b) => Number(b.rate) - Number(a.rate)
+                    );
+                default:
+                    break;
+            }
+        },
+    },
+});
+
+export const productsAction = productsSlice.actions;
+
 const store = configureStore({
     reducer: {
+        navigation: navigationSlice.reducer,
         authentication: authentication.reducer,
         tagsSlice: tagsSlice.reducer,
+        products: productsSlice.reducer,
     },
 });
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;
-// export type AppThunk<ReturnType = void> = ThunkAction<
-//     ReturnType,
-//     RootState,
-//     unknown,
-//     Action<string>
-// >;
+
 export default store;
