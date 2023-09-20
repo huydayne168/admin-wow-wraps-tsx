@@ -6,12 +6,12 @@ import { useAppSelector } from "./useStore";
 const usePrivateHttp = () => {
     const currentUser = useAppSelector((state) => state.authentication);
     const refresh = useRefreshToken();
-    console.log(currentUser.accessToken);
 
     useEffect(() => {
         const requestIntercept = privateHttp.interceptors.request.use(
             (config) => {
-                if (!config.headers.Authorization) {
+                if (!config.headers.Authorization && currentUser.accessToken) {
+                    console.log(currentUser.accessToken);
                     config.headers.Authorization = `Bearer ${currentUser.accessToken}`;
                 }
                 return config;
@@ -29,6 +29,7 @@ const usePrivateHttp = () => {
                     console.log("okee");
 
                     const newAccessToken = await refresh();
+                    console.log(newAccessToken);
                     prevRequest.headers[
                         "Authorization"
                     ] = `Bearer ${newAccessToken}`;
