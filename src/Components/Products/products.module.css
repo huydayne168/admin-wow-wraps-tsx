@@ -18,3 +18,27 @@
     background-color: #198c19;
     color: #fff;
 }
+
+.header-title {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sort-icon {
+    /* margin-left: auto; */
+    opacity: 0.2;
+    transition: all 300ms ease;
+}
+
+.sort-icon:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

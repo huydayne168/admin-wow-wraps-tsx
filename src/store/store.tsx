@@ -1,20 +1,37 @@
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { Product } from "../models/product";
+import { type } from "os";
 
 ////// Navigation Slice:
-const navigationInit = "dash-board";
+const navigationInit = localStorage.getItem("navigationState") || "dash-board";
 
 const navigationSlice = createSlice({
     name: "navigation",
     initialState: navigationInit,
     reducers: {
         setNavigationState(state, action) {
+            localStorage.setItem("navigationState", action.payload);
             return (state = action.payload);
         },
     },
 });
 
 export const navigationActions = navigationSlice.actions;
+
+////// Loading State:
+const loadingInit = false;
+
+const loadingSlice = createSlice({
+    name: "loading",
+    initialState: loadingInit,
+    reducers: {
+        setLoading(state, action) {
+            return (state = action.payload);
+        },
+    },
+});
+
+export const loadingActions = loadingSlice.actions;
 
 ////// Authentication store:
 const id = localStorage.getItem("currentUserId");
@@ -90,13 +107,14 @@ const tagsSlice = createSlice({
 export const tagsActions = tagsSlice.actions;
 
 ////// Products store: (this slice is used too manage products and sort products)
+
 const intiProducts: Product[] = [];
 
 const productsSlice = createSlice({
     name: "products",
     initialState: intiProducts,
     reducers: {
-        getAllProducts(state, action) {
+        setProducts(state, action) {
             return (state = action.payload);
         },
 
@@ -104,15 +122,27 @@ const productsSlice = createSlice({
             switch (action.payload) {
                 case "HIGH_RATE":
                     return state.sort(
-                        (a, b) => Number(a.rate) - Number(b.rate)
+                        (a, b) => Number(b.rate) - Number(a.rate)
                     );
                 case "LOW_RATE":
                     return state.sort(
-                        (a, b) => Number(b.rate) - Number(a.rate)
+                        (a, b) => Number(a.rate) - Number(b.rate)
                     );
                 default:
                     break;
             }
+        },
+
+        search(state, action) {
+            const searchPart: string = action.payload.searchPart;
+            const searchInputValue = action.payload.searchInputValue;
+            console.log(searchInputValue);
+
+            if (searchInputValue === "") return state;
+            const result = state.filter((product: any) => {
+                return product[searchPart].includes(searchInputValue);
+            });
+            return (state = result);
         },
     },
 });
@@ -122,6 +152,7 @@ export const productsAction = productsSlice.actions;
 const store = configureStore({
     reducer: {
         navigation: navigationSlice.reducer,
+        loading: loadingSlice.reducer,
         authentication: authentication.reducer,
         tagsSlice: tagsSlice.reducer,
         products: productsSlice.reducer,

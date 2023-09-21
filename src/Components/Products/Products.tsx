@@ -4,42 +4,43 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faAngleLeft,
     faAngleRight,
-    faArrowUp19,
     faArrowsUpDown,
+    faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import http from "../../utils/http";
 import type { Product } from "../../models/product";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
 import { navigationActions } from "../../store/store";
 import { productsAction } from "../../store/store";
+import { loadingActions } from "../../store/store";
+import SearchInput from "./SearchInput";
+import { BeatLoader } from "react-spinners";
 // import DeletePopup from "../DeletePopup/DeletePopup";
 const Products: React.FC = () => {
-    // const [load, setLoad] = useState(false);
-    // const [isPopup, setIsPopup] = useState(false);
-    // const [deleteData, setDeleteData] = useState("");
-    // const privateHttp
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const isLoading = useAppSelector((state) => state.loading);
+    const [idSearch, setIdSearch] = useState(false);
+    const [nameSearch, setNameSearch] = useState(false);
     const [sortRate, setSortRate] = useState<string>("HIGH_RATE");
     const products = useAppSelector((state) => state.products);
-
-    // function reloadPage(state) {
-    //     setLoad((load) => !load);
-    // }
+    const [search] = useSearchParams();
 
     useEffect(() => {
         const getAllProducts = async () => {
+            dispatch(loadingActions.setLoading(true));
             try {
                 const res = await http.get(
                     process.env.REACT_APP_SERVER_DOMAIN +
-                        "/api/product/get-all-products",
+                        "/api/product/get-products",
                     {
-                        withCredentials: true,
+                        params: search || null,
                     }
                 );
-
-                dispatch(productsAction.getAllProducts(res.data));
+                dispatch(loadingActions.setLoading(false));
+                dispatch(productsAction.setProducts(res.data));
+                dispatch(productsAction.sortByRate(sortRate));
             } catch (error) {
                 console.log(error);
             }
@@ -97,72 +98,138 @@ const Products: React.FC = () => {
                     <thead>
                         <tr>
                             <th scope="col">
-                                {sortRate === "HIGH_RATE"
-                                    ? "High rate"
-                                    : "Low rate"}{" "}
-                                <FontAwesomeIcon
-                                    icon={faArrowsUpDown}
-                                    onClick={handleSortByRate}
-                                />
+                                <div className={styles["header-title"]}>
+                                    {sortRate === "HIGH_RATE"
+                                        ? "High rate"
+                                        : "Low rate"}{" "}
+                                    <FontAwesomeIcon
+                                        icon={faArrowsUpDown}
+                                        onClick={handleSortByRate}
+                                        className={styles["sort-icon"]}
+                                    />
+                                </div>
                             </th>
-                            <th scope="col">ID</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Description</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Category</th>
-                            <th scope="col">Action</th>
+                            <th scope="col">
+                                <div className={styles["header-title"]}>
+                                    ID
+                                    <FontAwesomeIcon
+                                        icon={faSearch}
+                                        className={styles["sort-icon"]}
+                                        onClick={() => {
+                                            setIdSearch((pre) => !pre);
+                                        }}
+                                    />
+                                    {idSearch ? (
+                                        <SearchInput
+                                            searchType={"_id"}
+                                            obj={products}
+                                        />
+                                    ) : (
+                                        ""
+                                    )}
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div className={styles["header-title"]}>
+                                    Name
+                                    <FontAwesomeIcon
+                                        icon={faSearch}
+                                        className={styles["sort-icon"]}
+                                        onClick={() => {
+                                            setNameSearch((pre) => !pre);
+                                        }}
+                                    />
+                                    {nameSearch ? (
+                                        <SearchInput
+                                            searchType={"name"}
+                                            obj={products}
+                                        />
+                                    ) : (
+                                        ""
+                                    )}
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div className={styles["header-title"]}>
+                                    Description
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div className={styles["header-title"]}>
+                                    Price
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div className={styles["header-title"]}>
+                                    Category
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div className={styles["header-title"]}>
+                                    Action
+                                </div>
+                            </th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        {products[0] &&
-                            products.map((product, index) => {
-                                return (
-                                    <tr key={product._id}>
-                                        <th scope="row">{index + 1}</th>
-                                        <td>{product._id}</td>
-                                        <td>{product.name}</td>
-                                        <td>{product.shortDescription}</td>
-                                        <td>${product.price}</td>
-                                        <td>{product.category}</td>
-                                        <td>
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline-danger ms-1"
-                                                style={{ fontSize: "12px" }}
-                                                // onClick={(e) =>
-                                                //     deleteHandler(e, product)
-                                                // }
-                                            >
-                                                Delete
-                                            </button>
+                        {products[0] && !isLoading
+                            ? products.map((product: any, index: number) => {
+                                  return (
+                                      <tr key={product._id}>
+                                          <th scope="row">
+                                              {product.rate} stars
+                                          </th>
+                                          <td>{product._id}</td>
+                                          <td>{product.name}</td>
+                                          <td>{product.shortDescription}</td>
+                                          <td>${product.price}</td>
+                                          <td>{product.category}</td>
+                                          <td>
+                                              <button
+                                                  type="button"
+                                                  className="btn btn-outline-danger ms-1"
+                                                  style={{ fontSize: "12px" }}
+                                                  // onClick={(e) =>
+                                                  //     deleteHandler(e, product)
+                                                  // }
+                                              >
+                                                  Delete
+                                              </button>
 
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline-primary ms-1"
-                                                style={{ fontSize: "12px" }}
-                                                // onClick={(e) =>
-                                                //     deleteHandler(e, product)
-                                                // }
-                                            >
-                                                Edit
-                                            </button>
+                                              <button
+                                                  type="button"
+                                                  className="btn btn-outline-primary ms-1"
+                                                  style={{ fontSize: "12px" }}
+                                                  // onClick={(e) =>
+                                                  //     deleteHandler(e, product)
+                                                  // }
+                                              >
+                                                  Edit
+                                              </button>
 
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline-success ms-1"
-                                                style={{ fontSize: "12px" }}
-                                                // onClick={(e) =>
-                                                //     deleteHandler(e, product)
-                                                // }
-                                            >
-                                                Detail
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                              <button
+                                                  type="button"
+                                                  className="btn btn-outline-success ms-1"
+                                                  style={{ fontSize: "12px" }}
+                                                  // onClick={(e) =>
+                                                  //     deleteHandler(e, product)
+                                                  // }
+                                              >
+                                                  Detail
+                                              </button>
+                                          </td>
+                                      </tr>
+                                  );
+                              })
+                            : null}
                     </tbody>
                 </table>
+                {isLoading && (
+                    <div className={styles["loading"]}>
+                        <BeatLoader />
+                    </div>
+                )}
 
                 <div className="tableDirection">
                     <span>1 - 8 of 8</span>
