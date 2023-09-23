@@ -247,7 +247,10 @@ const Products: React.FC = () => {
                                 </div>
                             </th>
                             <th scope="col" style={{ width: "18%" }}>
-                                <div className={styles["header-title"]}>
+                                <div
+                                    className={`${styles["header-title"]}`}
+                                    style={{ justifyContent: "center" }}
+                                >
                                     Action
                                 </div>
                             </th>
@@ -265,7 +268,9 @@ const Products: React.FC = () => {
                                           <td>{product._id}</td>
                                           <td>{product.name}</td>
                                           <td>{product.shortDescription}</td>
-                                          <td>${product.price}</td>
+                                          <td className="text-center">
+                                              ${product.price}
+                                          </td>
                                           <td>{product.category}</td>
                                           <td>
                                               <button
