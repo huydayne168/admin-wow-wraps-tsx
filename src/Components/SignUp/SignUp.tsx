@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import styles from "./sign-up.module.css";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { type } from "os";
 import http from "../../utils/http";
 const SignUp: React.FC<{}> = () => {
     const [signUpState, setSignUpState] = useState("SIGN_UP_FORM"); // SIGN_UP_FORM so render sign up form, VERIFY_CODE_FORM so render the verify code form

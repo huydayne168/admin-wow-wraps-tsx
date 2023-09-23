@@ -2,7 +2,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 24px;
+}
+
+.heading h2 {
+    display: flex;
+    align-items: center;
+    gap: 32px;
 }
 
 .heading button {

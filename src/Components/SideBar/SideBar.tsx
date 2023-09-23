@@ -20,14 +20,7 @@ function SideBar() {
     const dispatch = useAppDispatch();
     const currentUserData = useAppSelector((state) => state.authentication);
     const navigationState = useAppSelector((state) => state.navigation);
-    const [currentUser, setCurrentUser] = useState<User>({
-        _id: "",
-        userName: "",
-        email: "",
-        password: "",
-        refreshToken: "",
-        roles: [],
-    });
+    const [currentUser, setCurrentUser] = useState<User>();
     useEffect(() => {
         const getCurrentUser = async () => {
             const res = await http.get("/get-user", {
@@ -50,7 +43,7 @@ function SideBar() {
     return (
         <div className={`${styles.sideBar} `}>
             <div className={`${styles.header} fs-3 text-center`}>
-                {currentUser.userName ? currentUser.userName : "Admin"}
+                {currentUser?.userName ? currentUser.userName : "Admin"}
             </div>
 
             <nav>

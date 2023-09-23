@@ -1,8 +1,9 @@
 .heading {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     align-items: center;
     margin-bottom: 12px;
+    gap: 32px;
 }
 
 .heading button {
@@ -17,4 +18,33 @@
 .heading button:hover {
     background-color: #198c19;
     color: #fff;
+}
+
+.header-title {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sort-icon {
+    /* margin-left: auto; */
+    opacity: 0.2;
+    transition: all 300ms ease;
+}
+
+.sort-icon:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown {
+    top: 100%;
+    display: block !important;
 }

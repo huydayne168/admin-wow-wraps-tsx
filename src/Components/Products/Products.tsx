@@ -32,6 +32,7 @@ const Products: React.FC = () => {
     const [search] = useSearchParams();
     const privateHttp = usePrivateHttp();
 
+    // get all products from database:
     useEffect(() => {
         const getAllProducts = async () => {
             dispatch(loadingActions.setLoading(true));
@@ -78,7 +79,6 @@ const Products: React.FC = () => {
                         },
                     }
                 );
-
                 dispatch(productsAction.deleteProduct(product._id));
             } catch (error) {
                 console.log(error);
@@ -89,16 +89,15 @@ const Products: React.FC = () => {
 
     return (
         <div className="tableWrapper">
-            {/* {isPopup && (
-                <DeletePopup
-                    data={deleteData}
-                    closeModal={closeModal}
-                    type={"Room"}
-                    reload={reloadPage}
-                />
-            )} */}
             <div className={styles.heading}>
-                <h2>Products List</h2>
+                <h2>
+                    Products List
+                    {isLoading && (
+                        <div className={styles["loading"]}>
+                            <BeatLoader />
+                        </div>
+                    )}
+                </h2>
                 <button
                     onClick={(e) => {
                         e.preventDefault();
@@ -324,11 +323,6 @@ const Products: React.FC = () => {
                             : null}
                     </tbody>
                 </table>
-                {isLoading && (
-                    <div className={styles["loading"]}>
-                        <BeatLoader />
-                    </div>
-                )}
 
                 <div className="tableDirection">
                     <span>1 - 8 of 8</span>

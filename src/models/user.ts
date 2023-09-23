@@ -5,6 +5,7 @@ export type User = {
     userName: string;
     email: string;
     password: string;
-    refreshToken: string;
-    roles: string[];
+    phoneNumber: string;
+    refreshToken?: string;
+    roles: any;
 };
