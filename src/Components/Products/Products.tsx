@@ -6,6 +6,7 @@ import {
     faAngleRight,
     faArrowsUpDown,
     faSearch,
+    faSortDown,
 } from "@fortawesome/free-solid-svg-icons";
 import http from "../../utils/http";
 import type { Product } from "../../models/product";
@@ -16,6 +17,7 @@ import { productsAction } from "../../store/store";
 import { loadingActions } from "../../store/store";
 import SearchInput from "./SearchInput";
 import { BeatLoader } from "react-spinners";
+import usePrivateHttp from "../../hooks/usePrivateHttp";
 // import DeletePopup from "../DeletePopup/DeletePopup";
 const Products: React.FC = () => {
     const navigate = useNavigate();
@@ -23,9 +25,12 @@ const Products: React.FC = () => {
     const isLoading = useAppSelector((state) => state.loading);
     const [idSearch, setIdSearch] = useState(false);
     const [nameSearch, setNameSearch] = useState(false);
+    const [priceSortDropdown, setPriceSortDropdown] = useState(false);
     const [sortRate, setSortRate] = useState<string>("HIGH_RATE");
+    const [sortPrice, setSortPrice] = useState<string>("Price");
     const products = useAppSelector((state) => state.products);
     const [search] = useSearchParams();
+    const privateHttp = usePrivateHttp();
 
     useEffect(() => {
         const getAllProducts = async () => {
@@ -53,7 +58,6 @@ const Products: React.FC = () => {
             setSortRate((pre) => "LOW_RATE");
             dispatch(productsAction.sortByRate("LOW_RATE"));
         } else if (sortRate === "LOW_RATE") {
-            console.log("low rate here");
             setSortRate((pre) => "HIGH_RATE");
             dispatch(productsAction.sortByRate("HIGH_RATE"));
         }
@@ -63,11 +67,25 @@ const Products: React.FC = () => {
     //     setIsPopup(state);
     // }
 
-    // function deleteHandler(e, room) {
-    //     e.preventDefault();
-    //     setIsPopup(true);
-    //     setDeleteData(room);
-    // }
+    const deleteHandler = useCallback(
+        async (product: Product) => {
+            try {
+                const res = await privateHttp.delete(
+                    "/api/product/delete-product",
+                    {
+                        params: {
+                            _id: product._id,
+                        },
+                    }
+                );
+
+                dispatch(productsAction.deleteProduct(product._id));
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        [dispatch, privateHttp]
+    );
 
     return (
         <div className="tableWrapper">
@@ -97,7 +115,7 @@ const Products: React.FC = () => {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th scope="col">
+                            <th scope="col" style={{ width: "10%" }}>
                                 <div className={styles["header-title"]}>
                                     {sortRate === "HIGH_RATE"
                                         ? "High rate"
@@ -109,7 +127,7 @@ const Products: React.FC = () => {
                                     />
                                 </div>
                             </th>
-                            <th scope="col">
+                            <th scope="col" style={{ width: "20%" }}>
                                 <div className={styles["header-title"]}>
                                     ID
                                     <FontAwesomeIcon
@@ -129,7 +147,7 @@ const Products: React.FC = () => {
                                     )}
                                 </div>
                             </th>
-                            <th scope="col">
+                            <th scope="col" style={{ width: "15%" }}>
                                 <div className={styles["header-title"]}>
                                     Name
                                     <FontAwesomeIcon
@@ -154,9 +172,74 @@ const Products: React.FC = () => {
                                     Description
                                 </div>
                             </th>
-                            <th scope="col">
+                            <th scope="col" style={{ width: "10%" }}>
                                 <div className={styles["header-title"]}>
-                                    Price
+                                    {sortPrice}
+                                    <FontAwesomeIcon
+                                        icon={faSortDown}
+                                        className={styles["sort-icon"]}
+                                        onClick={() => {
+                                            setPriceSortDropdown((pre) => !pre);
+                                        }}
+                                    />
+                                    {priceSortDropdown ? (
+                                        <ul
+                                            className={`${styles["dropdown"]} dropdown-menu`}
+                                        >
+                                            <li>
+                                                <a
+                                                    className="dropdown-item"
+                                                    href="#"
+                                                    onClick={() => {
+                                                        dispatch(
+                                                            productsAction.sortByRate(
+                                                                sortRate
+                                                            )
+                                                        );
+                                                        setSortPrice("Price");
+                                                    }}
+                                                >
+                                                    Default
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    className="dropdown-item"
+                                                    href="#"
+                                                    onClick={() => {
+                                                        dispatch(
+                                                            productsAction.sortByPrice(
+                                                                "HIGH_PRICE"
+                                                            )
+                                                        );
+                                                        setSortPrice(
+                                                            "High Price"
+                                                        );
+                                                    }}
+                                                >
+                                                    Hight Price
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    className="dropdown-item"
+                                                    href="#"
+                                                    onClick={() => {
+                                                        dispatch(
+                                                            productsAction.sortByPrice(
+                                                                "LOW_PRICE"
+                                                            )
+                                                        );
+                                                        setSortPrice(
+                                                            "Low Price"
+                                                        );
+                                                    }}
+                                                >
+                                                    Low Price
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    ) : null}
                                 </div>
                             </th>
                             <th scope="col">
@@ -164,7 +247,7 @@ const Products: React.FC = () => {
                                     Category
                                 </div>
                             </th>
-                            <th scope="col">
+                            <th scope="col" style={{ width: "18%" }}>
                                 <div className={styles["header-title"]}>
                                     Action
                                 </div>
@@ -190,9 +273,9 @@ const Products: React.FC = () => {
                                                   type="button"
                                                   className="btn btn-outline-danger ms-1"
                                                   style={{ fontSize: "12px" }}
-                                                  // onClick={(e) =>
-                                                  //     deleteHandler(e, product)
-                                                  // }
+                                                  onClick={(e) => {
+                                                      deleteHandler(product);
+                                                  }}
                                               >
                                                   Delete
                                               </button>
@@ -201,9 +284,17 @@ const Products: React.FC = () => {
                                                   type="button"
                                                   className="btn btn-outline-primary ms-1"
                                                   style={{ fontSize: "12px" }}
-                                                  // onClick={(e) =>
-                                                  //     deleteHandler(e, product)
-                                                  // }
+                                                  onClick={(e) =>
+                                                      navigate(
+                                                          "/admin/edit-product" +
+                                                              `/${product._id}`,
+                                                          {
+                                                              state: {
+                                                                  product,
+                                                              },
+                                                          }
+                                                      )
+                                                  }
                                               >
                                                   Edit
                                               </button>
@@ -212,9 +303,17 @@ const Products: React.FC = () => {
                                                   type="button"
                                                   className="btn btn-outline-success ms-1"
                                                   style={{ fontSize: "12px" }}
-                                                  // onClick={(e) =>
-                                                  //     deleteHandler(e, product)
-                                                  // }
+                                                  onClick={(e) =>
+                                                      navigate(
+                                                          "/admin/product-detail" +
+                                                              `/${product._id}`,
+                                                          {
+                                                              state: {
+                                                                  product,
+                                                              },
+                                                          }
+                                                      )
+                                                  }
                                               >
                                                   Detail
                                               </button>

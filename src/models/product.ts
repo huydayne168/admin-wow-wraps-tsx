@@ -11,5 +11,5 @@ export type Product = {
     category: string;
     tags: string[];
     reviews: Review[];
-    image: object;
+    image: any;
 };

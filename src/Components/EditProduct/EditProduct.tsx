@@ -1,17 +1,17 @@
-import React, { useCallback, useEffect, useState } from "react";
-// import { useParams } from "react-router";
-import usePrivateHttp from "../../hooks/usePrivateHttp";
+import React, { useCallback } from "react";
+import ProductForm from "../ProductForm/ProductForm";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Product } from "../../models/product";
 import { useAppDispatch } from "../../hooks/useStore";
 import { loadingActions } from "../../store/store";
-import { useNavigate } from "react-router-dom";
-import { Product } from "../../models/product";
-import ProductForm from "../ProductForm/ProductForm";
-const AddProduct: React.FC = () => {
-    const privateHttp = usePrivateHttp();
+import usePrivateHttp from "../../hooks/usePrivateHttp";
+const EditProduct: React.FC<{}> = () => {
+    const location = useLocation();
+    const product = location.state.product;
     const dispatch = useAppDispatch();
+    const privateHttp = usePrivateHttp();
     const navigate = useNavigate();
-    // post product data to server to add a new product:
-    const handleAddProduct = useCallback(async (product: Product) => {
+    const editProductHandler = useCallback(async (product: Product) => {
         const {
             _id,
             name,
@@ -23,11 +23,13 @@ const AddProduct: React.FC = () => {
             tags,
             image,
         } = product;
+
         try {
             dispatch(loadingActions.setLoading(true));
-            const response = await privateHttp.post(
-                "/api/product/add-product",
+            const response = await privateHttp.patch(
+                "/api/product/edit-product",
                 {
+                    _id,
                     name,
                     category,
                     amount,
@@ -39,14 +41,16 @@ const AddProduct: React.FC = () => {
                 }
             );
             dispatch(loadingActions.setLoading(false));
-            navigate("/admin/products");
+            navigate("/admin/product-detail" + `/${product._id}`, {
+                state: { product },
+            });
         } catch (error) {
             console.log(error);
         }
     }, []);
-
-    // return tsx:
-    return <ProductForm handleProductFn={handleAddProduct} />;
+    return (
+        <ProductForm product={product} handleProductFn={editProductHandler} />
+    );
 };
 
-export default AddProduct;
+export default EditProduct;

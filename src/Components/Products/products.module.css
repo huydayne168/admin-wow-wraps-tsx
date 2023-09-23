@@ -42,3 +42,8 @@
     align-items: center;
     justify-content: center;
 }
+
+.dropdown {
+    top: 100%;
+    display: block !important;
+}

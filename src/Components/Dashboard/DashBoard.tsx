@@ -7,7 +7,6 @@ import { useAppSelector } from "../../hooks/useStore";
 
 function DashBoard() {
     const currentUser = useAppSelector((state) => state.authentication);
-    console.log(currentUser);
 
     return (
         <div className={styles.dashboard}>

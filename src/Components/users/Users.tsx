@@ -6,14 +6,6 @@ import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 const Users: React.FC<{}> = () => {
     return (
         <div className="tableWrapper">
-            {/* {isPopup && (
-        <DeletePopup
-            data={deleteData}
-            closeModal={closeModal}
-            type={"Room"}
-            reload={reloadPage}
-        />
-    )} */}
             <div className={styles.heading}>
                 <h2>Users List</h2>
                 <button>Add New</button>
@@ -30,7 +22,6 @@ const Users: React.FC<{}> = () => {
                             <th scope="col">Email</th>
                             <th scope="col">Phone Number</th>
                             <th scope="col">Status</th>
-                            {/* <th scope="col">Action</th> */}
                         </tr>
                     </thead>
                     <tbody></tbody>

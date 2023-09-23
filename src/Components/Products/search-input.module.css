@@ -1,5 +1,5 @@
 .search-input {
-    min-width: 140px;
+    /* min-width: 140px; */
     height: fit-content;
     position: absolute;
     top: -110%;

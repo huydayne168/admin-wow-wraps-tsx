@@ -42,7 +42,6 @@ const SearchInput: React.FC<{
         },
         [search, searchType, setSearch]
     );
-    console.log(searchHandler);
 
     return (
         <div className={styles["search-input"]}>

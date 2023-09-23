@@ -8,6 +8,7 @@ import {
     faMoneyBill,
     faBowlFood,
     faArrowRightFromBracket,
+    faTag,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
 import http from "../../utils/http";
@@ -34,7 +35,6 @@ function SideBar() {
                     _id: currentUserData._id,
                 },
             });
-            console.log(res.data);
             setCurrentUser(res.data);
         };
         getCurrentUser();
@@ -45,7 +45,6 @@ function SideBar() {
         });
         dispatch(authActions.logout());
         navigate("/");
-        console.log(res);
     }, []);
 
     return (
@@ -128,6 +127,25 @@ function SideBar() {
                     >
                         <FontAwesomeIcon icon={faMoneyBill} />
                         Checkouts
+                    </Link>
+
+                    <Link
+                        to={"categories"}
+                        className={`${
+                            navigationState === "tags-categories"
+                                ? styles["active"]
+                                : ""
+                        }`}
+                        onClick={() => {
+                            dispatch(
+                                navigationActions.setNavigationState(
+                                    "tags-categories"
+                                )
+                            );
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faTag} />
+                        Tags & Categories
                     </Link>
                 </div>
 

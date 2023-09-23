@@ -10,6 +10,9 @@ import Transactions from "./Components/Transactions/Transactions";
 import AddProduct from "./Components/AddProduct/AddProduct";
 import Users from "./Components/users/Users";
 import SignUp from "./Components/SignUp/SignUp";
+import ProductDetail from "./Components/ProductDetail/ProductDetail";
+import EditProduct from "./Components/EditProduct/EditProduct";
+import TagsAndCategories from "./Components/TagsAndCategories/TagsAndCategories";
 function App() {
     const router = createBrowserRouter([
         {
@@ -41,9 +44,23 @@ function App() {
                     path: "transactions",
                     element: <Transactions />,
                 },
+
+                {
+                    path: ":tagsCategories",
+                    element: <TagsAndCategories />,
+                },
                 {
                     path: "add-product",
                     element: <AddProduct />,
+                },
+                {
+                    path: "product-detail/:productId",
+                    element: <ProductDetail />,
+                },
+
+                {
+                    path: "edit-product/:productId",
+                    element: <EditProduct />,
                 },
             ],
         },

@@ -53,7 +53,7 @@ const authentication = createSlice({
         },
 
         storeNewAccessToken(state, action) {
-            const newState = { ...state, ...action.payload.accessToken };
+            const newState = { ...state, accessToken: action.payload };
             return (state = newState);
         },
 
@@ -86,21 +86,6 @@ const tagsSlice = createSlice({
         fetchAllTags(state, action) {
             state.allTags = action.payload;
         },
-        chooseThisTag(state, action) {
-            const tag: string = action.payload;
-            if (tag) {
-                state.choseTags.push(tag);
-            }
-        },
-        deleteThisChoseTag(state, action) {
-            const data: string = action.payload;
-            if (data) {
-                const newChoseTags = state.choseTags.filter((tag) => {
-                    return tag !== data;
-                });
-                state.choseTags = newChoseTags;
-            }
-        },
     },
 });
 
@@ -118,6 +103,13 @@ const productsSlice = createSlice({
             return (state = action.payload);
         },
 
+        deleteProduct(state, action) {
+            const newState = state.filter(
+                (product) => product._id !== action.payload
+            );
+            return (state = newState);
+        },
+
         sortByRate(state, action) {
             switch (action.payload) {
                 case "HIGH_RATE":
@@ -133,16 +125,26 @@ const productsSlice = createSlice({
             }
         },
 
-        search(state, action) {
-            const searchPart: string = action.payload.searchPart;
-            const searchInputValue = action.payload.searchInputValue;
-            console.log(searchInputValue);
-
-            if (searchInputValue === "") return state;
-            const result = state.filter((product: any) => {
-                return product[searchPart].includes(searchInputValue);
-            });
-            return (state = result);
+        sortByPrice(state, action) {
+            switch (action.payload) {
+                // if 2 item have the same price so we sort by higher rate
+                case "HIGH_PRICE":
+                    return state.sort((a, b) => {
+                        if (Number(b.price) - Number(a.price) === 0) {
+                            return Number(b.rate) - Number(a.rate);
+                        }
+                        return Number(b.price) - Number(a.price);
+                    });
+                case "LOW_PRICE":
+                    return state.sort((a, b) => {
+                        if (Number(a.price) - Number(b.price) === 0) {
+                            return Number(b.rate) - Number(a.rate);
+                        }
+                        return Number(a.price) - Number(b.price);
+                    });
+                default:
+                    break;
+            }
         },
     },
 });

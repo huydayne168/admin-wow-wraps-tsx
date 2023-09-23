@@ -49,7 +49,6 @@ const SignUp: React.FC<{}> = () => {
                 secretKey,
                 verifyCode,
             });
-            console.log(res);
             if (!verifyCode && res.status !== 400 && res.status !== 500) {
                 // if valid inputs and can send email (detail in backend) so I change this component to the verify code form:
                 setSignUpState("VERIFY_CODE_FORM");
