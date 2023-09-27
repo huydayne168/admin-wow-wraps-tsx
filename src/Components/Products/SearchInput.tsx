@@ -20,14 +20,10 @@ const SearchInput: React.FC<{
             const text = e.target.value;
             if (text.length === 0) {
                 search.delete(queryType);
-                setSearch(search, {
-                    replace: true,
-                });
+                setSearch(search);
             } else {
                 search.set(queryType, text);
-                setSearch(search, {
-                    replace: true,
-                });
+                setSearch(search);
             }
             dispatch(loadingActions.setLoading(true));
             const res = await http.get(

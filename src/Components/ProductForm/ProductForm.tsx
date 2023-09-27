@@ -66,7 +66,7 @@ const ProductForm: React.FC<{
             setTagsList(tagsSlice.allTags);
         } else {
             const filteredTags = tagsList.filter((tag: any) =>
-                tag.tagName.includes(tagsValue)
+                tag.includes(tagsValue)
             );
             setTagsList(filteredTags);
         }
@@ -235,7 +235,7 @@ const ProductForm: React.FC<{
                                         <li key={tag} className={styles["tag"]}>
                                             {tag}
                                             <div
-                                                key={tag.tagName + "deleteIcon"}
+                                                key={tag.name + "deleteIcon"}
                                                 onClick={(e) => {
                                                     handleDeleteChoseTag(
                                                         e.currentTarget

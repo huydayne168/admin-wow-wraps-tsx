@@ -22,15 +22,62 @@ import usePrivateHttp from "../../hooks/usePrivateHttp";
 const Products: React.FC = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const isLoading = useAppSelector((state) => state.loading);
-    const [idSearch, setIdSearch] = useState(false);
-    const [nameSearch, setNameSearch] = useState(false);
-    const [priceSortDropdown, setPriceSortDropdown] = useState(false);
-    const [sortRate, setSortRate] = useState<string>("HIGH_RATE");
-    const [sortPrice, setSortPrice] = useState<string>("Price");
-    const products = useAppSelector((state) => state.products);
-    const [search] = useSearchParams();
     const privateHttp = usePrivateHttp();
+    // isLoading state:
+    const isLoading = useAppSelector((state) => state.loading);
+    // set search id input show/hide:
+    const [idSearch, setIdSearch] = useState(false);
+    // set search name input show/hide:
+    const [nameSearch, setNameSearch] = useState(false);
+    // set sort price dropdown show/hide:
+    const [priceSortDropdown, setPriceSortDropdown] = useState(false);
+    // get products from store:
+    const products = useAppSelector((state) => state.products);
+    // search params:
+    const [search, setSearch] = useSearchParams();
+    // set page pagination:
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [isLastPage, setIsLastPage] = useState<boolean>(false);
+    const [sortRate, setSortRate] = useState(false);
+    const [sortLowPrice, setSortLowPrice] = useState(false);
+    const [sortHighPrice, setSortHighPrice] = useState(false);
+
+    useEffect(() => {
+        if (sortHighPrice) {
+            search.set("sortHighPrice", sortHighPrice.toString());
+            search.delete("sortLowPrice");
+        } else if (sortLowPrice) {
+            search.set("sortLowPrice", sortLowPrice.toString());
+            search.delete("sortHighPrice");
+            search.delete("sortRate");
+        } else {
+            search.delete("sortLowPrice");
+            search.delete("sortHighPrice");
+        }
+
+        setSearch(search, {
+            replace: true,
+        });
+    }, [sortHighPrice, sortLowPrice]);
+
+    useEffect(() => {
+        search.set("sortRate", sortRate.toString());
+
+        search.delete("sortLowPrice");
+        search.delete("sortHighPrice");
+        setSearch(search, {
+            replace: true,
+        });
+    }, [sortRate]);
+
+    // by default set search params category=All and page = 1
+    useEffect(() => {
+        search.set("category", "All");
+        search.set("page", currentPage.toString());
+        setSearch(search, {
+            replace: true,
+        });
+    }, [currentPage]);
 
     // get all products from database:
     useEffect(() => {
@@ -44,30 +91,22 @@ const Products: React.FC = () => {
                         params: search || null,
                     }
                 );
-                dispatch(loadingActions.setLoading(false));
-                dispatch(productsAction.setProducts(res.data));
-                dispatch(productsAction.sortByRate(sortRate));
+                if (res.data.isLastPage) {
+                    dispatch(loadingActions.setLoading(false));
+                    dispatch(productsAction.setProducts(res.data.products));
+                    setIsLastPage(true);
+                } else {
+                    dispatch(loadingActions.setLoading(false));
+                    dispatch(productsAction.setProducts(res.data));
+                }
             } catch (error) {
                 console.log(error);
             }
         };
         getAllProducts();
-    }, []);
+    }, [search]);
 
-    const handleSortByRate = useCallback(() => {
-        if (sortRate === "HIGH_RATE") {
-            setSortRate((pre) => "LOW_RATE");
-            dispatch(productsAction.sortByRate("LOW_RATE"));
-        } else if (sortRate === "LOW_RATE") {
-            setSortRate((pre) => "HIGH_RATE");
-            dispatch(productsAction.sortByRate("HIGH_RATE"));
-        }
-    }, [dispatch, sortRate]);
-
-    // function closeModal(state) {
-    //     setIsPopup(state);
-    // }
-
+    // delete product:
     const deleteHandler = useCallback(
         async (product: Product) => {
             try {
@@ -116,12 +155,12 @@ const Products: React.FC = () => {
                         <tr>
                             <th scope="col" style={{ width: "10%" }}>
                                 <div className={styles["header-title"]}>
-                                    {sortRate === "HIGH_RATE"
-                                        ? "High rate"
-                                        : "Low rate"}{" "}
+                                    {sortRate ? "High Rate" : "Low Rate"}
                                     <FontAwesomeIcon
                                         icon={faArrowsUpDown}
-                                        onClick={handleSortByRate}
+                                        onClick={() => {
+                                            setSortRate((pre) => !pre);
+                                        }}
                                         className={styles["sort-icon"]}
                                     />
                                 </div>
@@ -173,7 +212,9 @@ const Products: React.FC = () => {
                             </th>
                             <th scope="col" style={{ width: "10%" }}>
                                 <div className={styles["header-title"]}>
-                                    {sortPrice}
+                                    {(sortHighPrice && "Hight Price") ||
+                                        (sortLowPrice && "Low Price") ||
+                                        "Price"}
                                     <FontAwesomeIcon
                                         icon={faSortDown}
                                         className={styles["sort-icon"]}
@@ -190,12 +231,8 @@ const Products: React.FC = () => {
                                                     className="dropdown-item"
                                                     href="#"
                                                     onClick={() => {
-                                                        dispatch(
-                                                            productsAction.sortByRate(
-                                                                sortRate
-                                                            )
-                                                        );
-                                                        setSortPrice("Price");
+                                                        setSortHighPrice(false);
+                                                        setSortLowPrice(false);
                                                     }}
                                                 >
                                                     Default
@@ -206,14 +243,14 @@ const Products: React.FC = () => {
                                                     className="dropdown-item"
                                                     href="#"
                                                     onClick={() => {
-                                                        dispatch(
-                                                            productsAction.sortByPrice(
-                                                                "HIGH_PRICE"
-                                                            )
+                                                        setSortHighPrice(true);
+                                                        setSortLowPrice(false);
+                                                        search.delete(
+                                                            "sortRate"
                                                         );
-                                                        setSortPrice(
-                                                            "High Price"
-                                                        );
+                                                        setSearch(search, {
+                                                            replace: true,
+                                                        });
                                                     }}
                                                 >
                                                     Hight Price
@@ -224,14 +261,14 @@ const Products: React.FC = () => {
                                                     className="dropdown-item"
                                                     href="#"
                                                     onClick={() => {
-                                                        dispatch(
-                                                            productsAction.sortByPrice(
-                                                                "LOW_PRICE"
-                                                            )
+                                                        setSortLowPrice(true);
+                                                        setSortHighPrice(false);
+                                                        search.delete(
+                                                            "sortRate"
                                                         );
-                                                        setSortPrice(
-                                                            "Low Price"
-                                                        );
+                                                        setSearch(search, {
+                                                            replace: true,
+                                                        });
                                                     }}
                                                 >
                                                     Low Price
@@ -330,9 +367,19 @@ const Products: React.FC = () => {
                 </table>
 
                 <div className="tableDirection">
-                    <span>1 - 8 of 8</span>
-                    <FontAwesomeIcon icon={faAngleLeft} />
-                    <FontAwesomeIcon icon={faAngleRight} />
+                    <FontAwesomeIcon
+                        icon={faAngleLeft}
+                        onClick={() => {
+                            setCurrentPage((pre) => pre - 1);
+                        }}
+                    />
+                    <span>{search.get("page")}</span>
+                    <FontAwesomeIcon
+                        icon={faAngleRight}
+                        onClick={() => {
+                            setCurrentPage((pre) => pre + 1);
+                        }}
+                    />
                 </div>
             </div>
         </div>

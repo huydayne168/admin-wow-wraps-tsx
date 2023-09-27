@@ -265,7 +265,7 @@ const SignUp: React.FC<{}> = () => {
         </div>
     ) : (
         <div className={`${styles.logInWrapper} logInPage container`}>
-            <div className={` card`} style={{ width: "26rem" }}>
+            <div className={`card`} style={{ width: "26rem" }}>
                 <div className="card-body">
                     <h5 className="card-title">Verify Your Code</h5>
                     <h6 className="card-subtitle mb-2 text-body-secondary">
