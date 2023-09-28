@@ -34,7 +34,6 @@ const usePrivateHttp = () => {
                         "Authorization"
                     ] = `Bearer ${newAccessToken}`;
                     dispatch(authActions.storeNewAccessToken(newAccessToken));
-                    console.log(currentUser.accessToken);
                     return privateHttp(prevRequest);
                 }
                 return Promise.reject(error);

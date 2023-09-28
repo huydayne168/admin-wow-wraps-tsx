@@ -147,7 +147,7 @@ const ProductForm: React.FC<{
                             {categoriesList[0] &&
                                 categoriesList.map((category) => {
                                     return (
-                                        <option value={category}>
+                                        <option key={category} value={category}>
                                             {category}
                                         </option>
                                     );

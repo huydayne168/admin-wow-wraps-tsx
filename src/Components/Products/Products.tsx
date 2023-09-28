@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import styles from "./products.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faAngleLeft,
-    faAngleRight,
     faArrowsUpDown,
     faSearch,
     faSortDown,
@@ -18,6 +16,14 @@ import { loadingActions } from "../../store/store";
 import SearchInput from "./SearchInput";
 import { BeatLoader } from "react-spinners";
 import usePrivateHttp from "../../hooks/usePrivateHttp";
+// ant design:
+import type { ColumnType, ColumnsType } from "antd/es/table";
+import { SearchOutlined, CaretDownOutlined } from "@ant-design/icons";
+import type { MenuProps } from "antd/es/menu";
+import { Input, Table, Button, Dropdown, Tag } from "antd";
+import type { PaginationProps } from "antd";
+import Pagination from "antd/es/pagination";
+import { AutoComplete } from "antd";
 // import DeletePopup from "../DeletePopup/DeletePopup";
 const Products: React.FC = () => {
     const navigate = useNavigate();
@@ -25,50 +31,50 @@ const Products: React.FC = () => {
     const privateHttp = usePrivateHttp();
     // isLoading state:
     const isLoading = useAppSelector((state) => state.loading);
-    // set search id input show/hide:
-    const [idSearch, setIdSearch] = useState(false);
-    // set search name input show/hide:
-    const [nameSearch, setNameSearch] = useState(false);
-    // set sort price dropdown show/hide:
-    const [priceSortDropdown, setPriceSortDropdown] = useState(false);
+
     // get products from store:
     const products = useAppSelector((state) => state.products);
+    // categories list:
+    const [categoriesList, setCategoriesList] = useState<string[]>([]);
+
     // search params:
     const [search, setSearch] = useSearchParams();
+
     // set page pagination:
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [isLastPage, setIsLastPage] = useState<boolean>(false);
+    const [totalProducts, setTotalProducts] = useState(0);
     const [sortRate, setSortRate] = useState(false);
     const [sortLowPrice, setSortLowPrice] = useState(false);
     const [sortHighPrice, setSortHighPrice] = useState(false);
 
+    // fetch all categories:
     useEffect(() => {
-        if (sortHighPrice) {
-            search.set("sortHighPrice", sortHighPrice.toString());
-            search.delete("sortLowPrice");
-        } else if (sortLowPrice) {
-            search.set("sortLowPrice", sortLowPrice.toString());
-            search.delete("sortHighPrice");
-            search.delete("sortRate");
-        } else {
-            search.delete("sortLowPrice");
-            search.delete("sortHighPrice");
-        }
+        const fetchCategories = async () => {
+            const res = await privateHttp.get("/api/category/get-categories");
+            console.log(res);
+            setCategoriesList(res.data);
+        };
 
-        setSearch(search, {
-            replace: true,
-        });
-    }, [sortHighPrice, sortLowPrice]);
+        fetchCategories();
+    }, []);
 
-    useEffect(() => {
-        search.set("sortRate", sortRate.toString());
+    // category drop down options:
+    const categoriesDropdownOptions = [
+        { value: "All" },
+        ...categoriesList.map((category) => ({
+            value: category,
+        })),
+    ];
+    console.log(categoriesDropdownOptions);
 
-        search.delete("sortLowPrice");
-        search.delete("sortHighPrice");
-        setSearch(search, {
-            replace: true,
-        });
-    }, [sortRate]);
+    // change page with ant pagination
+    const onChangePagination: PaginationProps["onChange"] = useCallback(
+        (page: number) => {
+            setCurrentPage(page);
+        },
+        []
+    );
+    console.log(currentPage);
 
     // by default set search params category=All and page = 1
     useEffect(() => {
@@ -91,14 +97,16 @@ const Products: React.FC = () => {
                         params: search || null,
                     }
                 );
+                console.log(res.data);
+
                 if (res.data.isLastPage) {
                     dispatch(loadingActions.setLoading(false));
                     dispatch(productsAction.setProducts(res.data.products));
-                    setIsLastPage(true);
                 } else {
                     dispatch(loadingActions.setLoading(false));
-                    dispatch(productsAction.setProducts(res.data));
+                    dispatch(productsAction.setProducts(res.data.products));
                 }
+                setTotalProducts(res.data.totalProducts);
             } catch (error) {
                 console.log(error);
             }
@@ -126,6 +134,303 @@ const Products: React.FC = () => {
         [dispatch, privateHttp]
     );
 
+    // ant column:
+    type DataIndex = keyof Product;
+    type Products = [{ product: Product; quantity: number }];
+    const getColumnSearchProps = (
+        dataIndex: DataIndex
+    ): ColumnType<Product> => ({
+        filterDropdown: ({}) => (
+            <div onKeyDown={(e) => e.stopPropagation()}>
+                <Input
+                    placeholder={`Search ${dataIndex}`}
+                    onChange={(e) => {
+                        if (e.target.value === "") {
+                            search.delete(`${dataIndex}Query`);
+                        } else {
+                            search.set(`${dataIndex}Query`, e.target.value);
+                        }
+                        setSearch(search, {
+                            replace: true,
+                        });
+                    }}
+                    style={{ display: "block" }}
+                />
+            </div>
+        ),
+        filterIcon: (filtered: boolean) => (
+            <SearchOutlined
+                style={{ color: filtered ? "#1677ff" : undefined }}
+            />
+        ),
+    });
+
+    const columns: ColumnsType<Product> = [
+        {
+            title: "Rate",
+            dataIndex: "rate",
+            key: "rate",
+            width: "5%",
+            render: (rate) => {
+                return <span>{rate} stars</span>;
+            },
+            filterDropdown: ({}) => {
+                return (
+                    <div
+                        style={{
+                            padding: "4px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "4px",
+                        }}
+                        onKeyDown={(e) => e.stopPropagation()}
+                    >
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.delete("sortRate");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            Default
+                        </div>
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.set("sortRate", "true");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            High Rate
+                        </div>
+
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.set("sortRate", "false");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            Low Rate
+                        </div>
+                    </div>
+                );
+            },
+            filterIcon: () => {
+                return <CaretDownOutlined />;
+            },
+        },
+        {
+            title: "Id",
+            dataIndex: "_id",
+            key: "_id",
+            width: "15%",
+            ...getColumnSearchProps("_id"),
+        },
+        {
+            title: "Name",
+            dataIndex: "name",
+            key: "name",
+            width: "20%",
+            ...getColumnSearchProps("name"),
+            render: (name, record) => {
+                return (
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                        }}
+                    >
+                        <img
+                            src={record.image}
+                            alt={record._id}
+                            style={{
+                                width: "50px",
+                                height: "50px",
+                                objectFit: "cover",
+                            }}
+                        />
+                        <div>{name}</div>
+                    </div>
+                );
+            },
+        },
+        {
+            title: "Description",
+            dataIndex: "shortDescription",
+            key: "shortDescription",
+            width: "20%",
+
+            render: (shortDescription) => {
+                return (
+                    <div className={styles["product-description"]}>
+                        {shortDescription}
+                    </div>
+                );
+            },
+        },
+
+        {
+            title: "Price",
+            dataIndex: "price",
+            key: "price",
+            width: "5%",
+            filterDropdown: ({}) => {
+                return (
+                    <div
+                        style={{
+                            padding: "4px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "4px",
+                        }}
+                        onKeyDown={(e) => e.stopPropagation()}
+                    >
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.delete("sortHighPrice");
+                                search.delete("sortLowPrice");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            Default
+                        </div>
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.set("sortHighPrice", "true");
+                                search.delete("sortRate");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            High Price
+                        </div>
+
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.set("sortLowPrice", "true");
+                                search.delete("sortRate");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            Low Price
+                        </div>
+                    </div>
+                );
+            },
+            filterIcon: () => {
+                return <CaretDownOutlined />;
+            },
+            render: (price) => {
+                return <span>${price}</span>;
+            },
+        },
+
+        {
+            title: "Category",
+            dataIndex: "category",
+            key: "category",
+            width: "10%",
+            filterDropdown: ({}) => {
+                return (
+                    <AutoComplete
+                        style={{
+                            // position: "absolute",
+                            // top: "-80px",
+                            width: "100%",
+                        }}
+                        placeholder={"search category here"}
+                        options={categoriesDropdownOptions}
+                        filterOption={(inputValue, option) =>
+                            option!.value
+                                .toUpperCase()
+                                .indexOf(inputValue.toUpperCase()) !== -1
+                        }
+                        onSelect={(value, option) => {
+                            console.log(option);
+                            if (value === "") {
+                                search.delete("category");
+                            } else {
+                                search.set("category", value);
+                            }
+                            setSearch(search, {
+                                replace: true,
+                            });
+                        }}
+                    />
+                );
+            },
+            filterIcon: () => {
+                return <CaretDownOutlined />;
+            },
+        },
+
+        {
+            title: "Actions",
+            width: "20%",
+            render: (_, record) => {
+                return (
+                    <div style={{ display: "flex", gap: "4px" }}>
+                        <Button
+                            onClick={(e) =>
+                                navigate(
+                                    "/admin/product-detail" + `/${record._id}`,
+                                    {
+                                        state: {
+                                            product: record,
+                                        },
+                                    }
+                                )
+                            }
+                        >
+                            Detail
+                        </Button>
+                        <Button
+                            onClick={(e) =>
+                                navigate(
+                                    "/admin/edit-product" + `/${record._id}`,
+                                    {
+                                        state: {
+                                            product: record,
+                                        },
+                                    }
+                                )
+                            }
+                            type="primary"
+                        >
+                            Edit
+                        </Button>
+                        <Button
+                            onClick={(e) => {
+                                deleteHandler(record);
+                            }}
+                            type="primary"
+                            danger
+                        >
+                            Delete
+                        </Button>
+                    </div>
+                );
+            },
+        },
+    ];
+
+    // Return tsx:
     return (
         <div className="tableWrapper">
             <div className={styles.heading}>
@@ -150,235 +455,19 @@ const Products: React.FC = () => {
                 </button>
             </div>
             <div className="tableContent">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th scope="col" style={{ width: "10%" }}>
-                                <div className={styles["header-title"]}>
-                                    {sortRate ? "High Rate" : "Low Rate"}
-                                    <FontAwesomeIcon
-                                        icon={faArrowsUpDown}
-                                        onClick={() => {
-                                            setSortRate((pre) => !pre);
-                                        }}
-                                        className={styles["sort-icon"]}
-                                    />
-                                </div>
-                            </th>
-                            <th scope="col" style={{ width: "20%" }}>
-                                <div className={styles["header-title"]}>
-                                    ID
-                                    <FontAwesomeIcon
-                                        icon={faSearch}
-                                        className={styles["sort-icon"]}
-                                        onClick={() => {
-                                            setIdSearch((pre) => !pre);
-                                        }}
-                                    />
-                                    {idSearch ? (
-                                        <SearchInput
-                                            searchType={"_id"}
-                                            obj={products}
-                                        />
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </th>
-                            <th scope="col" style={{ width: "15%" }}>
-                                <div className={styles["header-title"]}>
-                                    Name
-                                    <FontAwesomeIcon
-                                        icon={faSearch}
-                                        className={styles["sort-icon"]}
-                                        onClick={() => {
-                                            setNameSearch((pre) => !pre);
-                                        }}
-                                    />
-                                    {nameSearch ? (
-                                        <SearchInput
-                                            searchType={"name"}
-                                            obj={products}
-                                        />
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div className={styles["header-title"]}>
-                                    Description
-                                </div>
-                            </th>
-                            <th scope="col" style={{ width: "10%" }}>
-                                <div className={styles["header-title"]}>
-                                    {(sortHighPrice && "Hight Price") ||
-                                        (sortLowPrice && "Low Price") ||
-                                        "Price"}
-                                    <FontAwesomeIcon
-                                        icon={faSortDown}
-                                        className={styles["sort-icon"]}
-                                        onClick={() => {
-                                            setPriceSortDropdown((pre) => !pre);
-                                        }}
-                                    />
-                                    {priceSortDropdown ? (
-                                        <ul
-                                            className={`${styles["dropdown"]} dropdown-menu`}
-                                        >
-                                            <li>
-                                                <a
-                                                    className="dropdown-item"
-                                                    href="#"
-                                                    onClick={() => {
-                                                        setSortHighPrice(false);
-                                                        setSortLowPrice(false);
-                                                    }}
-                                                >
-                                                    Default
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    className="dropdown-item"
-                                                    href="#"
-                                                    onClick={() => {
-                                                        setSortHighPrice(true);
-                                                        setSortLowPrice(false);
-                                                        search.delete(
-                                                            "sortRate"
-                                                        );
-                                                        setSearch(search, {
-                                                            replace: true,
-                                                        });
-                                                    }}
-                                                >
-                                                    Hight Price
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    className="dropdown-item"
-                                                    href="#"
-                                                    onClick={() => {
-                                                        setSortLowPrice(true);
-                                                        setSortHighPrice(false);
-                                                        search.delete(
-                                                            "sortRate"
-                                                        );
-                                                        setSearch(search, {
-                                                            replace: true,
-                                                        });
-                                                    }}
-                                                >
-                                                    Low Price
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    ) : null}
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div className={styles["header-title"]}>
-                                    Category
-                                </div>
-                            </th>
-                            <th scope="col" style={{ width: "18%" }}>
-                                <div
-                                    className={`${styles["header-title"]}`}
-                                    style={{ justifyContent: "center" }}
-                                >
-                                    Action
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
+                <Table
+                    columns={columns}
+                    dataSource={products}
+                    pagination={false}
+                    loading={isLoading}
+                />
 
-                    <tbody>
-                        {products[0] && !isLoading
-                            ? products.map((product: any, index: number) => {
-                                  return (
-                                      <tr key={product._id}>
-                                          <th scope="row">
-                                              {product.rate} stars
-                                          </th>
-                                          <td>{product._id}</td>
-                                          <td>{product.name}</td>
-                                          <td>{product.shortDescription}</td>
-                                          <td className="text-center">
-                                              ${product.price}
-                                          </td>
-                                          <td>{product.category}</td>
-                                          <td>
-                                              <button
-                                                  type="button"
-                                                  className="btn btn-outline-danger ms-1"
-                                                  style={{ fontSize: "12px" }}
-                                                  onClick={(e) => {
-                                                      deleteHandler(product);
-                                                  }}
-                                              >
-                                                  Delete
-                                              </button>
-
-                                              <button
-                                                  type="button"
-                                                  className="btn btn-outline-primary ms-1"
-                                                  style={{ fontSize: "12px" }}
-                                                  onClick={(e) =>
-                                                      navigate(
-                                                          "/admin/edit-product" +
-                                                              `/${product._id}`,
-                                                          {
-                                                              state: {
-                                                                  product,
-                                                              },
-                                                          }
-                                                      )
-                                                  }
-                                              >
-                                                  Edit
-                                              </button>
-
-                                              <button
-                                                  type="button"
-                                                  className="btn btn-outline-success ms-1"
-                                                  style={{ fontSize: "12px" }}
-                                                  onClick={(e) =>
-                                                      navigate(
-                                                          "/admin/product-detail" +
-                                                              `/${product._id}`,
-                                                          {
-                                                              state: {
-                                                                  product,
-                                                              },
-                                                          }
-                                                      )
-                                                  }
-                                              >
-                                                  Detail
-                                              </button>
-                                          </td>
-                                      </tr>
-                                  );
-                              })
-                            : null}
-                    </tbody>
-                </table>
-
-                <div className="tableDirection">
-                    <FontAwesomeIcon
-                        icon={faAngleLeft}
-                        onClick={() => {
-                            setCurrentPage((pre) => pre - 1);
-                        }}
-                    />
-                    <span>{search.get("page")}</span>
-                    <FontAwesomeIcon
-                        icon={faAngleRight}
-                        onClick={() => {
-                            setCurrentPage((pre) => pre + 1);
-                        }}
+                <div className={styles["pagination"]}>
+                    <Pagination
+                        current={currentPage}
+                        onChange={onChangePagination}
+                        total={totalProducts}
+                        pageSize={5}
                     />
                 </div>
             </div>

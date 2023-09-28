@@ -1,6 +1,7 @@
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { Product } from "../models/product";
 import { type } from "os";
+import { Checkout } from "../models/checkout";
 
 ////// Navigation Slice:
 const navigationInit = localStorage.getItem("navigationState") || "dash-board";
@@ -109,47 +110,32 @@ const productsSlice = createSlice({
             );
             return (state = newState);
         },
-
-        sortByRate(state, action) {
-            switch (action.payload) {
-                case "HIGH_RATE":
-                    return state.sort(
-                        (a, b) => Number(b.rate) - Number(a.rate)
-                    );
-                case "LOW_RATE":
-                    return state.sort(
-                        (a, b) => Number(a.rate) - Number(b.rate)
-                    );
-                default:
-                    break;
-            }
-        },
-
-        sortByPrice(state, action) {
-            switch (action.payload) {
-                // if 2 item have the same price so we sort by higher rate
-                case "HIGH_PRICE":
-                    return state.sort((a, b) => {
-                        if (Number(b.price) - Number(a.price) === 0) {
-                            return Number(b.rate) - Number(a.rate);
-                        }
-                        return Number(b.price) - Number(a.price);
-                    });
-                case "LOW_PRICE":
-                    return state.sort((a, b) => {
-                        if (Number(a.price) - Number(b.price) === 0) {
-                            return Number(b.rate) - Number(a.rate);
-                        }
-                        return Number(a.price) - Number(b.price);
-                    });
-                default:
-                    break;
-            }
-        },
     },
 });
 
 export const productsAction = productsSlice.actions;
+
+////// Products store: (this slice is used too manage products and sort products)
+const intiCheckouts: Checkout[] = [];
+
+const checkoutsSlice = createSlice({
+    name: "checkouts",
+    initialState: intiCheckouts,
+    reducers: {
+        setCheckouts(state, action) {
+            return (state = action.payload);
+        },
+
+        deleteCheckout(state, action) {
+            const newState = state.filter(
+                (checkout) => checkout._id !== action.payload
+            );
+            return (state = newState);
+        },
+    },
+});
+
+export const checkoutsAction = checkoutsSlice.actions;
 
 const store = configureStore({
     reducer: {
@@ -158,6 +144,7 @@ const store = configureStore({
         authentication: authentication.reducer,
         tagsSlice: tagsSlice.reducer,
         products: productsSlice.reducer,
+        checkouts: checkoutsSlice.reducer,
     },
 });
 export type AppDispatch = typeof store.dispatch;

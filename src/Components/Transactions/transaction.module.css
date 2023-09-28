@@ -18,3 +18,10 @@
     background-color: #198c19;
     color: #fff;
 }
+
+.pagination {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

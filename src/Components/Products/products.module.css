@@ -53,3 +53,32 @@
     top: 100%;
     display: block !important;
 }
+
+.product-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pagination {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dropdown-item {
+    width: 100%;
+    padding: 4px;
+    transition: all 200ms ease;
+    border-radius: 2px;
+}
+
+.dropdown-item:hover {
+    background-color: #dcdcdc;
+    cursor: pointer;
+}
+
+.product-desc {
+}
