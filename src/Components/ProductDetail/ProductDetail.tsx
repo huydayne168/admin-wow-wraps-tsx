@@ -72,13 +72,16 @@ const ProductDetail: React.FC<{}> = () => {
 
                 <div className={styles["detail"]}>
                     <h3>
-                        CATEGORY: <span>{product.category}</span>
+                        CATEGORY: <span>{product.category.name}</span>
                     </h3>
                 </div>
 
                 <div className={styles["detail"]}>
                     <h3>
-                        TAGS: <span>{product.tags.join(", ")}</span>
+                        TAGS:{" "}
+                        <span>
+                            {product.tags.map((tag) => tag.name).join(", ")}
+                        </span>
                     </h3>
                 </div>
 

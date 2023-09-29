@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./products.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faArrowsUpDown,
-    faSearch,
-    faSortDown,
-} from "@fortawesome/free-solid-svg-icons";
+
 import http from "../../utils/http";
 import type { Product } from "../../models/product";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -13,17 +8,21 @@ import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
 import { navigationActions } from "../../store/store";
 import { productsAction } from "../../store/store";
 import { loadingActions } from "../../store/store";
-import SearchInput from "./SearchInput";
 import { BeatLoader } from "react-spinners";
 import usePrivateHttp from "../../hooks/usePrivateHttp";
 // ant design:
 import type { ColumnType, ColumnsType } from "antd/es/table";
-import { SearchOutlined, CaretDownOutlined } from "@ant-design/icons";
-import type { MenuProps } from "antd/es/menu";
-import { Input, Table, Button, Dropdown, Tag } from "antd";
+import {
+    SearchOutlined,
+    CaretDownOutlined,
+    EditOutlined,
+    InfoCircleOutlined,
+    DeleteOutlined,
+} from "@ant-design/icons";
+import { Input, Table, Button, Dropdown, Tag, Alert } from "antd";
 import type { PaginationProps } from "antd";
 import Pagination from "antd/es/pagination";
-import { AutoComplete } from "antd";
+import { AutoComplete, Popconfirm } from "antd";
 // import DeletePopup from "../DeletePopup/DeletePopup";
 const Products: React.FC = () => {
     const navigate = useNavigate();
@@ -43,9 +42,12 @@ const Products: React.FC = () => {
     // set page pagination:
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalProducts, setTotalProducts] = useState(0);
-    const [sortRate, setSortRate] = useState(false);
-    const [sortLowPrice, setSortLowPrice] = useState(false);
-    const [sortHighPrice, setSortHighPrice] = useState(false);
+
+    // set delete popup:
+    const [deletePopup, setDeletePopup] = useState(false);
+
+    // deleteFailState:
+    const [deleteFailState, setDeleteFailState] = useState(false);
 
     // fetch all categories:
     useEffect(() => {
@@ -117,6 +119,7 @@ const Products: React.FC = () => {
     // delete product:
     const deleteHandler = useCallback(
         async (product: Product) => {
+            dispatch(loadingActions.setLoading(true));
             try {
                 const res = await privateHttp.delete(
                     "/api/product/delete-product",
@@ -126,9 +129,12 @@ const Products: React.FC = () => {
                         },
                     }
                 );
+
                 dispatch(productsAction.deleteProduct(product._id));
+                dispatch(loadingActions.setLoading(false));
             } catch (error) {
                 console.log(error);
+                setDeleteFailState(true);
             }
         },
         [dispatch, privateHttp]
@@ -346,6 +352,9 @@ const Products: React.FC = () => {
             dataIndex: "category",
             key: "category",
             width: "10%",
+            render: (category) => {
+                return <span>{category.name}</span>;
+            },
             filterDropdown: ({}) => {
                 return (
                     <AutoComplete
@@ -382,7 +391,7 @@ const Products: React.FC = () => {
 
         {
             title: "Actions",
-            width: "20%",
+            width: "10%",
             render: (_, record) => {
                 return (
                     <div style={{ display: "flex", gap: "4px" }}>
@@ -397,9 +406,9 @@ const Products: React.FC = () => {
                                     }
                                 )
                             }
-                        >
-                            Detail
-                        </Button>
+                            icon={<InfoCircleOutlined />}
+                        />
+
                         <Button
                             onClick={(e) =>
                                 navigate(
@@ -412,18 +421,30 @@ const Products: React.FC = () => {
                                 )
                             }
                             type="primary"
-                        >
-                            Edit
-                        </Button>
-                        <Button
-                            onClick={(e) => {
+                            icon={<EditOutlined />}
+                        />
+
+                        <Popconfirm
+                            title="Delete"
+                            description="Are you sure to delete this product?"
+                            open={deletePopup}
+                            onConfirm={() => {
                                 deleteHandler(record);
                             }}
-                            type="primary"
-                            danger
+                            okButtonProps={{ loading: isLoading }}
+                            onCancel={(e) => {
+                                setDeletePopup(false);
+                            }}
                         >
-                            Delete
-                        </Button>
+                            <Button
+                                onClick={(e) => {
+                                    setDeletePopup(true);
+                                }}
+                                type="primary"
+                                danger
+                                icon={<DeleteOutlined />}
+                            />
+                        </Popconfirm>
                     </div>
                 );
             },
@@ -455,6 +476,18 @@ const Products: React.FC = () => {
                 </button>
             </div>
             <div className="tableContent">
+                {deleteFailState && (
+                    <Alert
+                        message="Can not delete"
+                        description="This product can not be deleted because it is now in an user's cart!!!"
+                        type="error"
+                        closable
+                        onClose={() => {
+                            setDeleteFailState(false);
+                        }}
+                    />
+                )}
+
                 <Table
                     columns={columns}
                     dataSource={products}

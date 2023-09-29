@@ -16,6 +16,7 @@ export type Checkout = {
     phoneNumber: string;
     paymentMethod: string;
     status: string;
+    total: number;
     user: User;
     _id: string;
 };

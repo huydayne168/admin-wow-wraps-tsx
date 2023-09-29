@@ -8,6 +8,9 @@ import ImagePreview from "../AddProduct/ImagePreview";
 import { Product } from "../../models/product";
 import usePrivateHttp from "../../hooks/usePrivateHttp";
 import { BeatLoader } from "react-spinners";
+import { type } from "os";
+import { Tag } from "../../models/tag";
+import { Category } from "../../models/category";
 const ProductForm: React.FC<{
     product?: Product;
     handleProductFn: Function;
@@ -19,10 +22,15 @@ const ProductForm: React.FC<{
     const isLoading = useAppSelector((state) => state.loading);
 
     // component state:
-    const [tagsList, setTagsList] = useState<any>([]);
-    const [categoriesList, setCategoriesList] = useState<string[]>([]);
+    const [tagsList, setTagsList] = useState<Tag[]>([]);
+    const [categoriesList, setCategoriesList] = useState<Category[]>([]);
     const [name, setName] = useState(product?.name || "");
-    const [category, setCategory] = useState(product?.category || "");
+    const [category, setCategory] = useState<Category>(
+        product?.category || {
+            _id: "",
+            name: "",
+        }
+    );
     const [amount, setAmount] = useState(product?.amount || "");
     const [price, setPrice] = useState(product?.price || "");
     const [shortDescription, setShortDescription] = useState(
@@ -34,7 +42,7 @@ const ProductForm: React.FC<{
     const [tagsValue, setTagsValue] = useState("");
 
     const [image, setImage] = useState<any>(product?.image || "");
-    const [choseTags, setChoseTags] = useState(product?.tags || []);
+    const [choseTags, setChoseTags] = useState<Tag[]>(product?.tags || []);
 
     // fetch all categories:
     useEffect(() => {
@@ -46,6 +54,8 @@ const ProductForm: React.FC<{
 
         fetchCategories();
     }, []);
+
+    console.log(categoriesList);
 
     // fetch all tags:
     useEffect(() => {
@@ -59,6 +69,7 @@ const ProductForm: React.FC<{
 
         fetchTags();
     }, [privateHttp, dispatch]);
+    console.log(tagsList);
 
     // handle filter tags:
     useEffect(() => {
@@ -66,7 +77,7 @@ const ProductForm: React.FC<{
             setTagsList(tagsSlice.allTags);
         } else {
             const filteredTags = tagsList.filter((tag: any) =>
-                tag.includes(tagsValue)
+                tag.name.toLowerCase().includes(tagsValue.toLowerCase())
             );
             setTagsList(filteredTags);
         }
@@ -74,23 +85,22 @@ const ProductForm: React.FC<{
 
     // function to set chose tags:
     const handleChooseTag = useCallback(
-        (target: any) => {
-            const tag = target.innerText;
-            if (!choseTags.some((choseTag) => choseTag === tag)) {
-                setChoseTags((pre) => {
+        (tag: any) => {
+            if (!choseTags.some((choseTag) => choseTag._id === tag._id)) {
+                setChoseTags((pre: Tag[]) => {
                     return [...pre, tag];
                 });
             }
         },
         [dispatch, tagsSlice.choseTags]
     );
+    console.log(choseTags);
 
     // function to delete chose tag:
-    const handleDeleteChoseTag = useCallback((target: any) => {
-        const tag = target.parentElement.innerText;
+    const handleDeleteChoseTag = useCallback((tag: Tag) => {
         if (tag) {
-            setChoseTags((prev) => {
-                return prev.filter((_tag) => _tag !== tag);
+            setChoseTags((prev: Tag[]) => {
+                return prev.filter((_tag) => _tag._id !== tag._id);
             });
         }
     }, []);
@@ -135,9 +145,9 @@ const ProductForm: React.FC<{
                             name="category"
                             id="category"
                             className="form-select"
-                            value={category}
+                            value={category.name}
                             onChange={(e) => {
-                                setCategory(e.target.value);
+                                setCategory(JSON.parse(e.target.value));
                             }}
                         >
                             <option value={""} disabled>
@@ -147,8 +157,11 @@ const ProductForm: React.FC<{
                             {categoriesList[0] &&
                                 categoriesList.map((category) => {
                                     return (
-                                        <option key={category} value={category}>
-                                            {category}
+                                        <option
+                                            key={category.name}
+                                            value={JSON.stringify(category)}
+                                        >
+                                            {category.name}
                                         </option>
                                     );
                                 })}
@@ -232,14 +245,15 @@ const ProductForm: React.FC<{
                             {choseTags &&
                                 choseTags.map((tag: any) => {
                                     return (
-                                        <li key={tag} className={styles["tag"]}>
-                                            {tag}
+                                        <li
+                                            key={tag._id}
+                                            className={styles["tag"]}
+                                        >
+                                            {tag.name}
                                             <div
                                                 key={tag.name + "deleteIcon"}
                                                 onClick={(e) => {
-                                                    handleDeleteChoseTag(
-                                                        e.currentTarget
-                                                    );
+                                                    handleDeleteChoseTag(tag);
                                                 }}
                                                 className={
                                                     styles["tag-delete-icon"]
@@ -258,13 +272,13 @@ const ProductForm: React.FC<{
                                 tagsList.map((tag: any) => {
                                     return (
                                         <li
-                                            key={tag}
+                                            key={tag._id}
                                             className={styles["tag"]}
                                             onClick={(e) => {
-                                                handleChooseTag(e.target);
+                                                handleChooseTag(tag);
                                             }}
                                         >
-                                            {tag}
+                                            {tag.name}
                                         </li>
                                     );
                                 })}
@@ -293,12 +307,12 @@ const ProductForm: React.FC<{
                             handleProductFn({
                                 _id: product?._id,
                                 name,
-                                category,
+                                category: category._id,
                                 amount,
                                 price,
                                 shortDescription,
                                 longDescription,
-                                tags: choseTags,
+                                tags: choseTags.map((tag) => tag._id),
                                 image,
                             });
                         }}

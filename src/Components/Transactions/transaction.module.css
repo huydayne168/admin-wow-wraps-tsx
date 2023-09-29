@@ -25,3 +25,15 @@
     justify-content: center;
     align-items: center;
 }
+
+.dropdown-item {
+    width: 100%;
+    padding: 4px;
+    transition: all 200ms ease;
+    border-radius: 2px;
+}
+
+.dropdown-item:hover {
+    background-color: #dcdcdc;
+    cursor: pointer;
+}

@@ -67,8 +67,8 @@ const TagsAndCategoriesForm: React.FC<{
                 <tbody>
                     {listItems.map((item: any) => {
                         return (
-                            <tr key={item}>
-                                <th scope="row">{item}</th>
+                            <tr key={item.name}>
+                                <th scope="row">{item.name}</th>
                                 <td className="text-center">
                                     <button
                                         type="button"

@@ -2,6 +2,7 @@ import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { Product } from "../models/product";
 import { type } from "os";
 import { Checkout } from "../models/checkout";
+import { Tag } from "../models/tag";
 
 ////// Navigation Slice:
 const navigationInit = localStorage.getItem("navigationState") || "dash-board";
@@ -72,9 +73,10 @@ export const authActions = authentication.actions;
 
 ////// Tags store:
 type TagsSlice = {
-    allTags: string[];
-    choseTags: string[];
+    allTags: Tag[];
+    choseTags: Tag[];
 };
+
 let tagsInit: TagsSlice = {
     allTags: [],
     choseTags: [],
@@ -115,7 +117,7 @@ const productsSlice = createSlice({
 
 export const productsAction = productsSlice.actions;
 
-////// Products store: (this slice is used too manage products and sort products)
+////// checkouts store: (this slice is used too manage checkouts and sort checkouts)
 const intiCheckouts: Checkout[] = [];
 
 const checkoutsSlice = createSlice({
@@ -131,6 +133,16 @@ const checkoutsSlice = createSlice({
                 (checkout) => checkout._id !== action.payload
             );
             return (state = newState);
+        },
+
+        updateStatus(state, action) {
+            const newState = state.map((checkout) => {
+                if (checkout._id === action.payload.checkout._id) {
+                    return { ...checkout, status: action.payload.status };
+                }
+                return checkout;
+            });
+            return newState;
         },
     },
 });

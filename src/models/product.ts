@@ -8,8 +8,16 @@ export type Product = {
     rate: number;
     shortDescription: string;
     longDescription: string;
-    category: string;
-    tags: string[];
+    category: {
+        _id: string;
+        name: string;
+    };
+    tags: [
+        {
+            _id: string;
+            name: string;
+        }
+    ];
     reviews: Review[];
     image: any;
 };
