@@ -1,18 +1,18 @@
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { Product } from "../models/product";
-import { type } from "os";
 import { Checkout } from "../models/checkout";
 import { Tag } from "../models/tag";
 
 ////// Navigation Slice:
-const navigationInit = localStorage.getItem("navigationState") || "dash-board";
+const navigationInit =
+    sessionStorage.getItem("navigationState") || "dash-board";
 
 const navigationSlice = createSlice({
     name: "navigation",
     initialState: navigationInit,
     reducers: {
         setNavigationState(state, action) {
-            localStorage.setItem("navigationState", action.payload);
+            sessionStorage.setItem("navigationState", action.payload);
             return (state = action.payload);
         },
     },

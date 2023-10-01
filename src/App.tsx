@@ -13,6 +13,8 @@ import SignUp from "./Components/SignUp/SignUp";
 import ProductDetail from "./Components/ProductDetail/ProductDetail";
 import EditProduct from "./Components/EditProduct/EditProduct";
 import TagsAndCategories from "./Components/TagsAndCategories/TagsAndCategories";
+import ErrorPage from "./Components/error/ErrorPage";
+import UserInfo from "./Components/users/UserInfo";
 function App() {
     const router = createBrowserRouter([
         {
@@ -24,9 +26,13 @@ function App() {
             element: <SignUp />,
         },
         {
-            path: "admin",
+            path: "/admin/",
             element: <Root />,
             children: [
+                {
+                    path: "*",
+                    element: <ErrorPage />,
+                },
                 {
                     path: "dash-board",
                     element: <DashBoard />,
@@ -35,6 +41,10 @@ function App() {
                 {
                     path: "users",
                     element: <Users />,
+                },
+                {
+                    path: "user-info/:userId",
+                    element: <UserInfo />,
                 },
                 {
                     path: "products",
@@ -46,7 +56,7 @@ function App() {
                 },
 
                 {
-                    path: ":tagsCategories",
+                    path: "tagsCategories/:tagsCategories",
                     element: <TagsAndCategories />,
                 },
                 {

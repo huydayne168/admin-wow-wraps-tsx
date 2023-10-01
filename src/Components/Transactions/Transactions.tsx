@@ -90,7 +90,6 @@ function Transactions() {
         },
         []
     );
-    console.log(selectCheckout?._id);
 
     // delete checkout handler:
     const deleteHandler = useCallback(async (checkoutId: string) => {
@@ -113,7 +112,7 @@ function Transactions() {
     // update drop down items:
     const items: MenuProps["items"] = [
         {
-            key: "CANCELED",
+            key: "canceled-item",
             label: (
                 <Button
                     style={{ width: "100%" }}
@@ -133,7 +132,7 @@ function Transactions() {
             ),
         },
         {
-            key: "PAID",
+            key: "paid-item",
             label: (
                 <Button
                     style={{
@@ -157,7 +156,7 @@ function Transactions() {
         },
 
         {
-            key: "WAITING",
+            key: "waiting-item",
             label: (
                 <Button
                     style={{
@@ -425,11 +424,30 @@ function Transactions() {
                         <Button
                             style={{
                                 width: "100%",
+                            }}
+                            onClick={() => {
+                                search.delete("sortStatus");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            All
+                        </Button>
+                        <Button
+                            style={{
+                                width: "100%",
                                 borderColor: "#4baa6a",
                                 color: "#4baa6a ",
                             }}
                             type="primary"
                             ghost
+                            onClick={() => {
+                                search.set("sortStatus", "done");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
                         >
                             Done
                         </Button>
@@ -440,6 +458,12 @@ function Transactions() {
                             }}
                             type="primary"
                             ghost
+                            onClick={() => {
+                                search.set("sortStatus", "waiting for paying");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
                         >
                             Waiting...
                         </Button>
@@ -451,6 +475,12 @@ function Transactions() {
                             type="primary"
                             danger
                             ghost
+                            onClick={() => {
+                                search.set("sortStatus", "cancel");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
                         >
                             Cancel
                         </Button>

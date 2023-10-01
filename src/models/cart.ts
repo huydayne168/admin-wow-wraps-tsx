@@ -3,12 +3,11 @@ import { User } from "./user";
 import { Product } from "./product";
 
 type FoodInCart = {
-    food: Product;
-    amount: number;
+    product: Product;
+    quantity: number;
 };
 
 export type Cart = {
     _id: string;
-    user: User;
-    foods: FoodInCart[];
+    products: FoodInCart[];
 };

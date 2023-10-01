@@ -455,14 +455,7 @@ const Products: React.FC = () => {
     return (
         <div className="tableWrapper">
             <div className={styles.heading}>
-                <h2>
-                    Products List
-                    {isLoading && (
-                        <div className={styles["loading"]}>
-                            <BeatLoader />
-                        </div>
-                    )}
-                </h2>
+                <h2>Products List</h2>
                 <button
                     onClick={(e) => {
                         e.preventDefault();

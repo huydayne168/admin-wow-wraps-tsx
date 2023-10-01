@@ -1,26 +1,32 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./sideBar.module.css";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faTableColumns,
-    faUser,
-    faMoneyBill,
-    faBowlFood,
-    faArrowRightFromBracket,
-    faTag,
-} from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
+
 import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
 import http from "../../utils/http";
 import { authActions } from "../../store/store";
 import { navigationActions } from "../../store/store";
 import type { User } from "../../models/user";
+import {
+    AppstoreAddOutlined,
+    FundOutlined,
+    UnorderedListOutlined,
+    UserOutlined,
+    InboxOutlined,
+    DollarOutlined,
+    TagOutlined,
+    LogoutOutlined,
+} from "@ant-design/icons";
+import type { MenuProps } from "antd";
+import { Menu, Avatar, Button, Space } from "antd";
 function SideBar() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const currentUserData = useAppSelector((state) => state.authentication);
     const navigationState = useAppSelector((state) => state.navigation);
     const [currentUser, setCurrentUser] = useState<User>();
+
+    // get current User:
     useEffect(() => {
         const getCurrentUser = async () => {
             const res = await http.get("/get-user", {
@@ -32,6 +38,8 @@ function SideBar() {
         };
         getCurrentUser();
     }, []);
+
+    // logout
     const logoutHandler = useCallback(async () => {
         const res = await http.get("/logout", {
             withCredentials: true,
@@ -40,142 +48,109 @@ function SideBar() {
         navigate("/");
     }, []);
 
+    // navigation:
+    type MenuItem = Required<MenuProps>["items"][number];
+    function getItem(
+        label: React.ReactNode,
+        key: React.Key,
+        icon?: React.ReactNode,
+        children?: MenuItem[],
+        type?: "group"
+    ): MenuItem {
+        return {
+            key,
+            icon,
+            children,
+            label,
+            type,
+        } as MenuItem;
+    }
+
+    const items: MenuItem[] = [
+        getItem(
+            null,
+            "main",
+            null,
+            [getItem("Dashboard", "dash-board", <FundOutlined />)],
+            "group"
+        ),
+        getItem("List", "list", <UnorderedListOutlined />, [
+            getItem("Users", "users", <UserOutlined />),
+            getItem("Products", "products", <InboxOutlined />),
+            getItem("Checkouts", "transactions", <DollarOutlined />),
+            getItem("Tags & Categories", "categories", <TagOutlined />),
+        ]),
+        getItem("New", "new", <AppstoreAddOutlined />, [
+            getItem("Add Product", "add-product"),
+        ]),
+    ];
+    const [openKeys, setOpenKeys] = useState(["dash-board"]);
+
+    const onOpenChange: MenuProps["onOpenChange"] = (keys) => {
+        const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1);
+        if (latestOpenKey && rootSubmenuKeys.indexOf(latestOpenKey!) === -1) {
+            setOpenKeys(keys);
+        } else {
+            setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
+        }
+    };
+    // submenu keys of first level
+    const rootSubmenuKeys = ["main", "list", "new"];
+
+    const onClickNavItem: MenuProps["onClick"] = (e) => {
+        console.log("click ", e);
+        dispatch(navigationActions.setNavigationState(e.key));
+        if (e.key === "categories") {
+            navigate(`tagsCategories/${e.key}`);
+        } else {
+            navigate(`${e.key}`);
+        }
+    };
+
     return (
         <div className={`${styles.sideBar} `}>
             <div className={`${styles.header} fs-3 text-center`}>
+                <svg
+                    width="53px"
+                    height="55px"
+                    viewBox="0 0 53 55"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={styles.logo}
+                >
+                    <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M22.3016 0.136647C17.6768 0.810504 13.6925 2.81786 10.1586 6.25427C9.38177 7.00987 8.29462 8.21548 7.74296 8.93332C7.1913 9.6513 6.23268 10.8595 5.61254 11.6183C2.85303 14.9956 1.23549 18.3124 0.384256 22.3393C-0.0295243 24.296 -0.126486 28.2112 0.178566 30.6368C1.39196 40.2841 6.91406 48.5562 14.831 52.5862C16.1638 53.2645 18.2823 54.0764 18.72 54.0764C18.8613 54.0764 18.9798 54.0004 18.9834 53.9073C18.9871 53.8143 18.9842 49.9235 18.9771 45.2612L18.9642 36.7843L19.8498 36.3651C21.1048 35.7708 22.3171 34.5205 22.6891 33.4371C23.0122 32.4957 23.0875 32.8491 22.784 33.8832C22.4344 35.0746 20.9494 36.451 19.4973 36.9296C19.3791 36.9684 19.2416 37.2035 19.1917 37.4518C19.0787 38.0159 19.1849 52.034 19.3046 52.3318C19.3565 52.4609 19.8652 52.6952 20.5553 52.9078C23.004 53.662 25.8719 53.8539 28.8313 53.4613C31.4481 53.1142 34.2694 52.318 34.5294 51.8532C34.6427 51.6507 34.6999 49.4715 34.7351 44.0275C34.7838 36.4833 34.7838 36.4823 34.5083 36.4823C34.3568 36.4823 33.9005 36.3564 33.4942 36.2027C30.5613 35.0921 28.7717 32.115 28.5503 27.9785L28.4804 26.6701L28.6637 28.0912C28.9193 30.0722 29.0859 30.6882 29.7442 32.0837C30.7024 34.1152 32.3471 35.5128 34.2995 35.955C34.9283 36.0974 35.0666 36.0922 35.2367 35.9202C35.5635 35.5894 35.3237 35.2983 34.5804 35.1235C32.2643 34.5786 30.543 32.6566 29.7977 29.7829C29.5741 28.9211 29.5163 28.2926 29.5146 26.7023C29.5127 25.0928 29.4743 24.6828 29.317 24.5938C28.8996 24.3574 29.8876 21.4298 30.903 19.8934C31.9688 18.2807 33.1995 17.3877 34.68 17.1528C38.7251 16.5109 42.0746 21.5816 41.8084 27.9449C41.7271 29.8866 41.5078 30.8551 40.8319 32.256C40.0209 33.9371 38.3565 35.329 36.8223 35.6093C36.5326 35.6622 36.2205 35.7659 36.1285 35.8398C35.8711 36.0465 35.9009 46.3133 36.169 49.8132C36.3117 51.6754 36.4333 52.5782 36.5585 52.7065C36.9355 53.0925 40.7879 51.0513 43.3076 49.1303C50.0448 43.9944 53.5019 36.3948 52.941 27.9534C52.6369 23.3753 51.7383 20.1619 49.4632 15.5153C47.5666 11.642 46.4065 9.968 43.9031 7.49168C40.1368 3.76632 34.8034 1.15278 29.1651 0.269686C27.2824 -0.025219 23.8665 -0.0914003 22.3016 0.136647ZM28.7594 1.09959C30.5874 1.35768 32.8422 1.9345 34.5893 2.59117C36.2572 3.21793 36.5244 3.45369 34.9607 2.91882C32.9036 2.21519 31.2141 1.94276 28.453 1.86954C25.7142 1.79686 24.1307 1.93071 21.549 2.45312C17.7928 3.21332 13.9677 4.8148 10.8189 6.94572L10.4846 7.17201L10.752 6.85586C11.2832 6.22815 13.6469 4.40404 14.8608 3.68512C17.2944 2.24375 19.8957 1.32547 22.5208 0.981166C23.6358 0.834863 27.3886 0.906187 28.7594 1.09959ZM35.6939 4.09615C40.5383 5.92567 44.8199 9.52679 47.709 14.2018C49.7755 17.5458 50.6699 22.3252 50.2196 27.6175C50.0896 29.1459 49.9546 29.0435 49.8274 27.3196C49.71 25.7279 49.1528 23.0838 48.5308 21.1671C45.9489 13.2099 40.6842 6.67369 34.624 3.90112C33.3989 3.34068 33.9685 3.44448 35.6939 4.09615ZM18.5087 4.32311C11.5277 7.23264 6.37765 13.2018 4.52995 20.5256C3.64341 24.0391 3.64715 29.0153 4.53944 33.1635C5.45848 37.4361 7.24252 41.512 9.69444 44.941C10.0331 45.4146 9.72173 45.1483 8.65678 44.0534C2.78255 38.0146 0.837753 29.7216 3.13361 20.5016C3.83398 17.6889 5.09819 14.6032 6.53947 12.1885C7.37826 10.7831 9.01466 9.25191 11.3778 7.66099C13.6648 6.12137 15.8137 5.06599 18.7762 4.02739C19.684 3.70921 19.5039 3.90829 18.5087 4.32311ZM37.1034 16.1193C39.4635 16.7374 41.4885 19.1485 42.4478 22.483C44.0572 28.0767 42.8431 33.6556 39.5472 35.8112C39.1239 36.0882 38.3759 36.4247 37.8851 36.5593L36.9927 36.8037L37.0755 42.4964C37.1552 47.9672 37.2867 50.1935 37.5457 50.4557C37.8925 50.8066 41.9839 48.0889 43.8762 46.2507C46.8257 43.3859 48.4651 40.3681 49.3398 36.1944C49.5016 35.4223 49.8351 33.9988 50.0808 33.0311C50.9353 29.6674 51.2787 26.8455 51.1841 23.9682C51.1534 23.0334 51.1685 22.3455 51.2178 22.4393C51.2672 22.5332 51.434 23.2799 51.5886 24.0987C52.4611 28.7235 52.279 33.1511 51.0611 36.9288C49.1626 42.8172 44.5416 48.0439 38.5539 51.0749L37.2015 51.7595L37.1222 50.9895C36.8974 48.8028 36.7538 44.3557 36.79 40.6966L36.8306 36.5874L37.6562 36.2851C39.504 35.608 40.7135 34.4593 41.6427 32.4989C42.8742 29.9006 43.072 26.8309 42.2273 23.422C41.0729 18.7624 38.2405 15.9487 34.9829 16.225C33.9732 16.3107 33.8793 16.2571 34.6987 16.0627C35.5015 15.8725 36.2255 15.8895 37.1034 16.1193ZM14.5159 23.2661C14.5329 29.3557 14.5595 30.1627 14.753 30.4614C14.9665 30.7911 15.411 30.899 15.7136 30.6945C16.165 30.3894 16.2085 29.9202 16.4045 23.2241C16.5125 19.5366 16.6539 16.4617 16.7189 16.3911C16.7934 16.31 16.885 16.3111 16.9672 16.3942C17.0455 16.4735 17.1323 19.1641 17.1853 23.1544C17.2809 30.3521 17.3131 30.6627 17.9639 30.6627C18.1803 30.6627 18.3838 30.5361 18.5297 30.3109C18.7333 29.9964 18.7659 29.2576 18.838 23.3071C18.8823 19.6484 18.9658 16.5779 19.0238 16.4837C19.196 16.2032 19.3581 16.4209 19.4311 17.0303C19.4688 17.345 19.5329 19.064 19.5737 20.8505C19.7827 30.0165 19.8246 30.5329 20.3753 30.7468C20.7313 30.8852 21.1979 30.6836 21.3612 30.3212C21.4742 30.07 21.5178 28.0751 21.5178 23.1449C21.5178 17.3083 21.5456 16.3166 21.7094 16.3166C21.8148 16.3166 21.9502 16.4536 22.0104 16.6212C22.0704 16.7887 22.1045 20.4881 22.0859 24.8421L22.0523 32.7585L21.7106 33.4653C21.5227 33.8538 21.094 34.4168 20.7579 34.7162C20.154 35.2542 18.9066 35.9409 18.5333 35.9409C18.0159 35.9409 18.0095 36.0589 18.0596 44.6683C18.0916 50.1732 18.0627 52.9933 17.9741 52.9926C17.6725 52.9901 14.8223 51.6559 13.7955 51.0366C9.49865 48.4452 6.17316 44.7085 3.79359 39.7981C1.75385 35.589 0.874398 31.7873 0.865973 27.1438C0.858885 23.2238 1.35037 20.9256 2.98984 17.2134C3.45605 16.1578 3.55394 16.3116 3.13414 17.4402C1.76776 21.114 1.02926 26.8455 1.44786 30.5273C2.11761 36.4178 4.39447 41.1187 8.56464 45.2205C10.089 46.7198 10.8902 47.3663 12.8918 48.712C13.6274 49.2065 14.7625 49.9763 15.4142 50.4227C16.066 50.869 16.6529 51.2343 16.7181 51.2343C16.7859 51.2343 16.837 48.1802 16.837 44.1248C16.837 37.4736 16.8219 37.0101 16.603 36.9371C15.4351 36.5479 14.0466 35.5157 13.6292 34.7265C13.5399 34.5573 13.7908 34.7463 14.187 35.1462C14.9805 35.9471 16.1883 36.6176 16.8374 36.6176C17.2119 36.6176 17.2516 36.5797 17.2136 36.2581C17.1806 35.9766 17.0576 35.859 16.6463 35.7157C15.2107 35.2151 14.1941 34.1537 13.8718 32.819C13.7311 32.2364 13.6339 32.0751 13.4038 32.0419C13.139 32.0037 13.1188 31.938 13.1741 31.2975C13.2076 30.9111 13.4161 27.4332 13.6375 23.569C13.8589 19.7046 14.073 16.4887 14.1134 16.4226C14.1537 16.3564 14.2566 16.326 14.3418 16.3547C14.4561 16.3934 14.5017 18.2037 14.5159 23.2661ZM33.1529 53.1536C30.3058 53.9365 28.7113 54.1323 25.3962 54.1062C23.7412 54.0931 22.1163 54.0657 21.7853 54.0456C21.2273 54.0115 21.1835 54.0327 21.1835 54.3374C21.1835 54.8305 21.6367 54.9119 24.7943 54.9848C28.0165 55.0591 29.8918 54.8703 32.5972 54.1989C34.7859 53.6558 34.8914 53.6106 34.8914 53.2146C34.8914 53.0346 34.8163 52.8604 34.7243 52.8274C34.6324 52.7944 33.9252 52.9412 33.1529 53.1536Z"
+                        fill="white"
+                    />
+                </svg>
                 {currentUser?.userName ? currentUser.userName : "Admin"}
             </div>
 
-            <nav>
-                <div className={styles.navCategory}>
-                    <div className={styles.navTitles}>Main</div>
-                    <Link
-                        to={"dash-board"}
-                        className={`${
-                            navigationState === "dash-board"
-                                ? styles["active"]
-                                : ""
-                        }`}
-                        onClick={() => {
-                            dispatch(
-                                navigationActions.setNavigationState(
-                                    "dash-board"
-                                )
-                            );
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faTableColumns} />
-                        Dashboard
-                    </Link>
-                </div>
+            <Space
+                direction="vertical"
+                style={{ width: "100%", gap: "80px", padding: "6px" }}
+            >
+                <Menu
+                    onClick={onClickNavItem}
+                    mode="inline"
+                    openKeys={openKeys}
+                    defaultSelectedKeys={[navigationState]}
+                    onOpenChange={onOpenChange}
+                    style={{ width: "100%" }}
+                    items={items}
+                />
 
-                <div className={styles.navCategory}>
-                    <div className={styles.navTitles}>List</div>
-                    <Link
-                        to={"users"}
-                        className={`${
-                            navigationState === "users" ? styles["active"] : ""
-                        }`}
-                        onClick={() => {
-                            dispatch(
-                                navigationActions.setNavigationState("users")
-                            );
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faUser} />
-                        Users
-                    </Link>
-
-                    <Link
-                        to={"products"}
-                        className={`${
-                            navigationState === "products"
-                                ? styles["active"]
-                                : ""
-                        }`}
-                        onClick={() => {
-                            dispatch(
-                                navigationActions.setNavigationState("products")
-                            );
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faBowlFood} />
-                        Products
-                    </Link>
-
-                    <Link
-                        to={"transactions"}
-                        className={`${
-                            navigationState === "transactions"
-                                ? styles["active"]
-                                : ""
-                        }`}
-                        onClick={() => {
-                            dispatch(
-                                navigationActions.setNavigationState(
-                                    "transactions"
-                                )
-                            );
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faMoneyBill} />
-                        Checkouts
-                    </Link>
-
-                    <Link
-                        to={"categories"}
-                        className={`${
-                            navigationState === "tags-categories"
-                                ? styles["active"]
-                                : ""
-                        }`}
-                        onClick={() => {
-                            dispatch(
-                                navigationActions.setNavigationState(
-                                    "tags-categories"
-                                )
-                            );
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faTag} />
-                        Tags & Categories
-                    </Link>
-                </div>
-
-                <div className={styles.navCategory}>
-                    <div className={styles.navTitles}>New</div>
-                    <Link
-                        to={"add-product"}
-                        className={`${
-                            navigationState === "add-product"
-                                ? styles["active"]
-                                : ""
-                        }`}
-                        onClick={() => {
-                            dispatch(
-                                navigationActions.setNavigationState(
-                                    "add-product"
-                                )
-                            );
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faBowlFood} />
-                        New Products
-                    </Link>
-                </div>
-
-                <div className={styles.navCategory}>
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            logoutHandler();
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faArrowRightFromBracket} />
-                        Log out
-                    </button>
-                </div>
-            </nav>
+                <Button
+                    type="primary"
+                    block
+                    onClick={logoutHandler}
+                    icon={<LogoutOutlined />}
+                >
+                    Log Out
+                </Button>
+            </Space>
         </div>
     );
 }

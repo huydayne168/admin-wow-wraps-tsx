@@ -8,320 +8,266 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useCallback, useEffect, useState } from "react";
 import usePrivateHttp from "../../hooks/usePrivateHttp";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { User } from "../../models/user";
 import { BeatLoader } from "react-spinners";
 import SearchUserInput from "./SearchUserInput";
+import type { PaginationProps } from "antd";
+import Pagination from "antd/es/pagination";
+import type { ColumnType, ColumnsType } from "antd/es/table";
+import type { FilterConfirmProps } from "antd/es/table/interface";
+import { Input, Table, Button, Dropdown, Tag, Popconfirm } from "antd";
+import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
+import {
+    SearchOutlined,
+    CaretDownOutlined,
+    DeleteOutlined,
+    InfoCircleOutlined,
+} from "@ant-design/icons";
 const Users: React.FC<{}> = () => {
     const privateHttp = usePrivateHttp();
+    const navigate = useNavigate();
     // states:
     const [isLoading, setIsLoading] = useState(false);
     const [search, setSearch] = useSearchParams();
     const [users, setUsers] = useState<User[]>([]);
-    const [isSearching, setIsSearching] = useState({
-        _id: false,
-        userName: false,
-        email: false,
-        phoneNumber: false,
-        role: false,
-    });
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const [sortRole, setSortRole] = useState("");
+    const [deletePopup, setDeletePopup] = useState(false);
+
+    // by default set search params category=All and page = 1
+    useEffect(() => {
+        search.set("page", currentPage.toString());
+        setSearch(search, {
+            replace: true,
+        });
+    }, [currentPage]);
+
+    // change page with ant pagination
+    const onChangePagination: PaginationProps["onChange"] = useCallback(
+        (page: number) => {
+            setCurrentPage(page);
+        },
+        []
+    );
+    console.log(currentPage);
+
     // get users from database
     useEffect(() => {
         const getUsers = async () => {
             setIsLoading(true);
             try {
-                setIsLoading(true);
                 const res = await privateHttp.get("/user/get-users", {
-                    params: search,
+                    params: search || null,
                 });
 
                 setIsLoading(false);
-                setUsers((prev) => res.data);
+                setUsers((prev) => res.data.users);
+                setTotalUsers(res.data.totalUsers);
             } catch (error) {
                 console.log(error);
             }
         };
 
         getUsers();
-    }, []);
+    }, [search]);
 
-    const searchHandler = useCallback(
-        async (text: string, queryType: string) => {
-            if (text.length === 0) {
-                search.delete(queryType);
-                setSearch(search, {
-                    replace: true,
-                });
-            } else {
-                search.set(queryType, text);
-                setSearch(search, {
-                    replace: true,
-                });
-            }
+    // Column type:
+    type DataIndex = keyof User;
+    const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<User> => ({
+        filterDropdown: ({}) => (
+            <div onKeyDown={(e) => e.stopPropagation()}>
+                <Input
+                    placeholder={`Search ${dataIndex}`}
+                    onChange={(e) => {
+                        if (e.target.value === "") {
+                            search.delete(`${dataIndex}Query`);
+                        } else {
+                            search.set(`${dataIndex}Query`, e.target.value);
+                        }
+                        setSearch(search, {
+                            replace: true,
+                        });
+                    }}
+                    style={{ display: "block" }}
+                />
+            </div>
+        ),
+        filterIcon: (filtered: boolean) => (
+            <SearchOutlined
+                style={{ color: filtered ? "#1677ff" : undefined }}
+            />
+        ),
+    });
 
-            try {
-                setIsLoading(true);
-                const res = await privateHttp.get("/user/get-users", {
-                    params: search,
-                });
-                setIsLoading(false);
-                setUsers((pre) => res.data);
-            } catch (error) {
-                console.log(error);
-            }
+    // columns data
+    const columns: ColumnsType<User> = [
+        {
+            title: "ID",
+            dataIndex: "_id",
+            key: "_id",
+            width: "28%",
+            ...getColumnSearchProps("_id"),
         },
-        []
-    );
+        {
+            title: "User",
+            dataIndex: "userName",
+            key: "userName",
+            width: "15%",
+            ...getColumnSearchProps("userName"),
+        },
+        {
+            title: "Email",
+            dataIndex: "email",
+            key: "email",
+            width: "25%",
 
-    const sortRoleHandler = useCallback(async (role: string) => {
-        setSortRole(role);
-        await searchHandler("", ""); // get all users back
-        setUsers((pre) => {
-            return pre.filter((user) => user.roles[role.toLowerCase()]);
-        });
-    }, []);
+            ...getColumnSearchProps("email"),
+        },
+
+        {
+            title: "Phone Number",
+            dataIndex: "phoneNumber",
+            key: "phoneNumber",
+            width: "15%",
+            ...getColumnSearchProps("phoneNumber"),
+        },
+
+        {
+            title: "Role",
+            dataIndex: "roleId",
+            key: "roleId",
+            width: "10%",
+            render: (roleId) => {
+                return (
+                    <Tag
+                        color={`${
+                            (roleId.name === "admin" && "processing") ||
+                            (roleId.name === "user" && "success")
+                        }`}
+                    >
+                        {roleId.name}
+                    </Tag>
+                );
+            },
+            filterDropdown: ({}) => {
+                return (
+                    <div
+                        style={{
+                            padding: "4px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "4px",
+                        }}
+                        onKeyDown={(e) => e.stopPropagation()}
+                    >
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.delete("sortRole");
+                                setSearch(search, { replace: true });
+                            }}
+                        >
+                            Default
+                        </div>
+
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.set("sortRole", "admin");
+                                setSearch(search, { replace: true });
+                            }}
+                        >
+                            Admin
+                        </div>
+
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.set("sortRole", "user");
+                                setSearch(search, { replace: true });
+                            }}
+                        >
+                            User
+                        </div>
+                    </div>
+                );
+            },
+            filterIcon: () => {
+                return <CaretDownOutlined />;
+            },
+        },
+
+        {
+            title: "Actions",
+            width: "20%",
+            dataIndex: "actions",
+            key: "actions",
+            render: (_, record) => {
+                return (
+                    <div style={{ display: "flex", gap: "4px" }}>
+                        <Button
+                            icon={<InfoCircleOutlined />}
+                            onClick={() => {
+                                // setOpenDetailPopup(true);
+                                navigate("/admin/user-info/" + record._id, {
+                                    state: {
+                                        userInfo: record,
+                                    },
+                                });
+                            }}
+                        />
+                        <Popconfirm
+                            title="Delete"
+                            description="Are you sure to delete this product?"
+                            open={deletePopup}
+                            onConfirm={() => {
+                                // deleteHandler(record._id);
+                            }}
+                            okButtonProps={{ loading: isLoading }}
+                            onCancel={(e) => {
+                                setDeletePopup(false);
+                            }}
+                        >
+                            <Button
+                                onClick={(e) => {
+                                    setDeletePopup(true);
+                                }}
+                                type="primary"
+                                danger
+                                icon={<DeleteOutlined />}
+                            />
+                        </Popconfirm>
+                    </div>
+                );
+            },
+        },
+    ];
 
     return (
         <div className="tableWrapper">
             <div className={styles.heading}>
                 <h2>Users List</h2>
-                {isLoading && (
-                    <div className={styles["loading"]}>
-                        <BeatLoader />
-                    </div>
-                )}
             </div>
 
             <div className="tableContent">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th scope="col" style={{ width: "20%" }}>
-                                <div className={styles["header-title"]}>
-                                    ID
-                                    <FontAwesomeIcon
-                                        icon={faSearch}
-                                        className={styles["sort-icon"]}
-                                        onClick={() => {
-                                            setIsSearching((pre) => {
-                                                return {
-                                                    ...pre,
-                                                    _id: !pre._id,
-                                                };
-                                            });
-                                        }}
-                                    />
-                                    {isSearching._id ? (
-                                        <SearchUserInput
-                                            type={"_id"}
-                                            searchHandler={searchHandler}
-                                        />
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </th>
-                            <th scope="col" style={{ width: "15%" }}>
-                                <div className={styles["header-title"]}>
-                                    Username
-                                    <FontAwesomeIcon
-                                        icon={faSearch}
-                                        className={styles["sort-icon"]}
-                                        onClick={() => {
-                                            setIsSearching((pre) => {
-                                                return {
-                                                    ...pre,
-                                                    userName: !pre.userName,
-                                                };
-                                            });
-                                        }}
-                                    />
-                                    {isSearching.userName ? (
-                                        <SearchUserInput
-                                            type={"userName"}
-                                            searchHandler={searchHandler}
-                                        />
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </th>
-                            <th scope="col" style={{ width: "30%" }}>
-                                <div className={styles["header-title"]}>
-                                    Email
-                                    <FontAwesomeIcon
-                                        icon={faSearch}
-                                        className={styles["sort-icon"]}
-                                        onClick={() => {
-                                            setIsSearching((pre) => {
-                                                return {
-                                                    ...pre,
-                                                    email: !pre.email,
-                                                };
-                                            });
-                                        }}
-                                    />
-                                    {isSearching.email ? (
-                                        <SearchUserInput
-                                            type={"email"}
-                                            searchHandler={searchHandler}
-                                        />
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </th>
-                            <th scope="col" style={{ width: "15%" }}>
-                                <div className={styles["header-title"]}>
-                                    Phone Number
-                                    <FontAwesomeIcon
-                                        icon={faSearch}
-                                        className={styles["sort-icon"]}
-                                        onClick={() => {
-                                            setIsSearching((pre) => {
-                                                return {
-                                                    ...pre,
-                                                    phoneNumber:
-                                                        !pre.phoneNumber,
-                                                };
-                                            });
-                                        }}
-                                    />
-                                    {isSearching.phoneNumber ? (
-                                        <SearchUserInput
-                                            type={"phoneNumber"}
-                                            searchHandler={searchHandler}
-                                        />
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div className={styles["header-title"]}>
-                                    {sortRole.length !== 0 ? sortRole : "Role"}
-                                    <FontAwesomeIcon
-                                        icon={faSortDown}
-                                        className={styles["sort-icon"]}
-                                        onClick={() => {
-                                            setIsSearching((pre) => {
-                                                return {
-                                                    ...pre,
-                                                    role: !pre.role,
-                                                };
-                                            });
-                                        }}
-                                    />
-                                    {isSearching.role ? (
-                                        <ul
-                                            className={`${styles["dropdown"]} dropdown-menu`}
-                                        >
-                                            <li>
-                                                <a
-                                                    className="dropdown-item"
-                                                    href="#"
-                                                    onClick={() => {
-                                                        setSortRole(
-                                                            (pre) => ""
-                                                        );
-                                                        searchHandler("", ""); // get all user back
-                                                    }}
-                                                >
-                                                    All
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    className="dropdown-item"
-                                                    href="#"
-                                                    onClick={() => {
-                                                        sortRoleHandler(
-                                                            "Admin"
-                                                        );
-                                                    }}
-                                                >
-                                                    Admin
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    className="dropdown-item"
-                                                    href="#"
-                                                    onClick={() => {
-                                                        sortRoleHandler("User");
-                                                    }}
-                                                >
-                                                    User
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    className="dropdown-item"
-                                                    href="#"
-                                                    onClick={() => {
-                                                        sortRoleHandler(
-                                                            "Counselor"
-                                                        );
-                                                    }}
-                                                >
-                                                    Counselor
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </th>
-                            <th scope="col" className="text-center">
-                                Action
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users[0] && !isLoading
-                            ? users.map((user: User, index: number) => {
-                                  return (
-                                      <tr key={user._id}>
-                                          <th scope="row">{user._id}</th>
-                                          <td>{user.userName}</td>
-                                          <td>{user.email}</td>
-                                          <td>{user.phoneNumber}</td>
-                                          <td>{Object.keys(user.roles)[0]}</td>
+                <Table
+                    columns={columns}
+                    dataSource={users}
+                    pagination={false}
+                    loading={isLoading}
+                />
 
-                                          <td className="text-center">
-                                              <button
-                                                  type="button"
-                                                  className="btn btn-outline-success ms-1"
-                                                  style={{ fontSize: "12px" }}
-                                                  //   onClick={(e) =>
-                                                  //       navigate(
-                                                  //           "/admin/product-detail" +
-                                                  //               `/${product._id}`,
-                                                  //           {
-                                                  //               state: {
-                                                  //                   product,
-                                                  //               },
-                                                  //           }
-                                                  //       )
-                                                  //   }
-                                              >
-                                                  Detail
-                                              </button>
-                                          </td>
-                                      </tr>
-                                  );
-                              })
-                            : null}
-                    </tbody>
-                </table>
-
-                <div className="tableDirection">
-                    <span>1 - 8 of 8</span>
-                    <FontAwesomeIcon icon={faAngleLeft} />
-                    <FontAwesomeIcon icon={faAngleRight} />
+                <div className={styles["pagination"]}>
+                    <Pagination
+                        current={currentPage}
+                        onChange={onChangePagination}
+                        total={totalUsers}
+                        pageSize={5}
+                        style={{ margin: "auto" }}
+                    />
                 </div>
             </div>
         </div>

@@ -1,4 +1,6 @@
 import { type } from "os";
+import { Cart } from "./cart";
+import { Checkout } from "./checkout";
 
 export type User = {
     _id: string;
@@ -7,5 +9,7 @@ export type User = {
     password: string;
     phoneNumber: string;
     refreshToken?: string;
-    roles: any;
+    roleId: any;
+    cart: Cart[];
+    checkout: Checkout[];
 };
