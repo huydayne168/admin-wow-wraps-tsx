@@ -5,7 +5,6 @@ import { useSearchParams } from "react-router-dom";
 import type { PaginationProps } from "antd";
 import Pagination from "antd/es/pagination";
 import type { ColumnType, ColumnsType } from "antd/es/table";
-import type { FilterConfirmProps } from "antd/es/table/interface";
 import { Input, Table, Button, Dropdown, Tag, Popconfirm } from "antd";
 import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
 import {
@@ -29,8 +28,7 @@ function Transactions() {
     const isLoading = useAppSelector((state) => state.loading);
     const [search, setSearch] = useSearchParams();
     const privateHttp = usePrivateHttp();
-    // set delete popup:
-    const [deletePopup, setDeletePopup] = useState(false);
+
     // by default set search params category=All and page = 1
     useEffect(() => {
         search.set("page", currentPage.toString());
@@ -517,19 +515,12 @@ function Transactions() {
                         <Popconfirm
                             title="Delete"
                             description="Are you sure to delete this product?"
-                            open={deletePopup}
                             onConfirm={() => {
                                 deleteHandler(record._id);
                             }}
                             okButtonProps={{ loading: isLoading }}
-                            onCancel={(e) => {
-                                setDeletePopup(false);
-                            }}
                         >
                             <Button
-                                onClick={(e) => {
-                                    setDeletePopup(true);
-                                }}
                                 type="primary"
                                 danger
                                 icon={<DeleteOutlined />}

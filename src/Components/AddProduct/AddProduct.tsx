@@ -10,8 +10,10 @@ const AddProduct: React.FC = () => {
     const privateHttp = usePrivateHttp();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const [errMess, setErrMess] = useState(false);
     // post product data to server to add a new product:
     const handleAddProduct = useCallback(async (product: Product) => {
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
         const {
             _id,
             name,
@@ -34,19 +36,21 @@ const AddProduct: React.FC = () => {
                     price,
                     shortDescription,
                     longDescription,
-                    tags,
+                    tags: tags.map((tag) => tag._id),
                     image,
                 }
             );
             dispatch(loadingActions.setLoading(false));
             navigate("/admin/products");
         } catch (error) {
+            setErrMess(true);
+            dispatch(loadingActions.setLoading(false));
             console.log(error);
         }
     }, []);
 
     // return tsx:
-    return <ProductForm handleProductFn={handleAddProduct} />;
+    return <ProductForm errMess={errMess} handleProductFn={handleAddProduct} />;
 };
 
 export default AddProduct;

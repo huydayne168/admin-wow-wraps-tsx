@@ -11,10 +11,12 @@ import { BeatLoader } from "react-spinners";
 import { type } from "os";
 import { Tag } from "../../models/tag";
 import { Category } from "../../models/category";
+import { Alert } from "antd";
 const ProductForm: React.FC<{
+    errMess?: boolean;
     product?: Product;
     handleProductFn: Function;
-}> = ({ product, handleProductFn }) => {
+}> = ({ errMess, product, handleProductFn }) => {
     const privateHttp = usePrivateHttp();
     const dispatch = useAppDispatch();
 
@@ -48,20 +50,16 @@ const ProductForm: React.FC<{
     useEffect(() => {
         const fetchCategories = async () => {
             const res = await privateHttp.get("/api/category/get-categories");
-            console.log(res);
             setCategoriesList(res.data);
         };
 
         fetchCategories();
     }, []);
 
-    console.log(categoriesList);
-
     // fetch all tags:
     useEffect(() => {
         const fetchTags = async () => {
             const res = await privateHttp.get("/api/tag/get-tags");
-            console.log(res);
 
             dispatch(tagsActions.fetchAllTags(res.data));
             setTagsList(res.data);
@@ -69,7 +67,6 @@ const ProductForm: React.FC<{
 
         fetchTags();
     }, [privateHttp, dispatch]);
-    console.log(tagsList);
 
     // handle filter tags:
     useEffect(() => {
@@ -94,7 +91,6 @@ const ProductForm: React.FC<{
         },
         [dispatch, tagsSlice.choseTags]
     );
-    console.log(choseTags);
 
     // function to delete chose tag:
     const handleDeleteChoseTag = useCallback((tag: Tag) => {
@@ -125,6 +121,13 @@ const ProductForm: React.FC<{
                 {product ? "Edit Product" : "Add New Products"}
                 {isLoading ? <BeatLoader /> : ""}
             </div>
+            {errMess && (
+                <Alert
+                    type="error"
+                    message="Please fill all inputs!!!"
+                    style={{ color: "red" }}
+                />
+            )}
             <div className={styles["product-form"]}>
                 <form action="#">
                     <div className={styles.controls}>
@@ -145,7 +148,6 @@ const ProductForm: React.FC<{
                             name="category"
                             id="category"
                             className="form-select"
-                            value={category.name}
                             onChange={(e) => {
                                 setCategory(JSON.parse(e.target.value));
                             }}
@@ -312,7 +314,7 @@ const ProductForm: React.FC<{
                                 price,
                                 shortDescription,
                                 longDescription,
-                                tags: choseTags.map((tag) => tag._id),
+                                tags: choseTags,
                                 image,
                             });
                         }}

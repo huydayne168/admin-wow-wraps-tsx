@@ -5,6 +5,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 const ProductDetail: React.FC<{}> = () => {
     const location = useLocation();
     const product: Product = location.state.product;
+    console.log(product.tags);
+
     const navigate = useNavigate();
     return (
         <div className={styles["product-detail"]}>

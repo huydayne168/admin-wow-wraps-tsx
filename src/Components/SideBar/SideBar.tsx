@@ -16,9 +16,12 @@ import {
     DollarOutlined,
     TagOutlined,
     LogoutOutlined,
+    ThunderboltOutlined,
+    CreditCardOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Menu, Avatar, Button, Space } from "antd";
+import Vouchers from "../Vouchers/Vouchers";
 function SideBar() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
@@ -34,7 +37,7 @@ function SideBar() {
                     _id: currentUserData._id,
                 },
             });
-            setCurrentUser(res.data);
+            setCurrentUser(res.data.foundUser);
         };
         getCurrentUser();
     }, []);
@@ -77,11 +80,15 @@ function SideBar() {
         getItem("List", "list", <UnorderedListOutlined />, [
             getItem("Users", "users", <UserOutlined />),
             getItem("Products", "products", <InboxOutlined />),
+            getItem("Flash Sale", "flash-sales", <ThunderboltOutlined />),
+            getItem("Voucher", "vouchers", <CreditCardOutlined />),
             getItem("Checkouts", "transactions", <DollarOutlined />),
             getItem("Tags & Categories", "categories", <TagOutlined />),
         ]),
         getItem("New", "new", <AppstoreAddOutlined />, [
             getItem("Add Product", "add-product"),
+            getItem("Add Flash Sale", "add-flashSale"),
+            getItem("Add Voucher", "add-voucher"),
         ]),
     ];
     const [openKeys, setOpenKeys] = useState(["dash-board"]);

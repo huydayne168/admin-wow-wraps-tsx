@@ -1,0 +1,39 @@
+.add-flashSale {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.heading {
+    font-size: 22px;
+    color: #1677ff;
+    padding: 12px 24px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.add-form {
+    flex: 1;
+    padding: 24px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.products-list-item {
+    margin: "0 4px";
+    width: "200px";
+    padding: "12px";
+    border-radius: "8px";
+    margin-bottom: "8px";
+    background-color: "#eee";
+    transition: all 200ms ease;
+}
+
+.products-list-item:hover {
+    cursor: pointer;
+    transform: scale(1.02);
+}
+
+.product-name:hover {
+    color: #1677ff;
+    text-decoration: underline;
+}

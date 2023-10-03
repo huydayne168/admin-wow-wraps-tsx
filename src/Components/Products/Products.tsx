@@ -44,7 +44,6 @@ const Products: React.FC = () => {
     const [totalProducts, setTotalProducts] = useState(0);
 
     // set delete popup:
-    const [deletePopup, setDeletePopup] = useState(false);
 
     // deleteFailState:
     const [deleteFailState, setDeleteFailState] = useState(false);
@@ -87,7 +86,7 @@ const Products: React.FC = () => {
         });
     }, [currentPage]);
 
-    // get all products from database:
+    // get products from database:
     useEffect(() => {
         const getAllProducts = async () => {
             dispatch(loadingActions.setLoading(true));
@@ -135,6 +134,7 @@ const Products: React.FC = () => {
             } catch (error) {
                 console.log(error);
                 setDeleteFailState(true);
+                dispatch(loadingActions.setLoading(false));
             }
         },
         [dispatch, privateHttp]
@@ -427,19 +427,12 @@ const Products: React.FC = () => {
                         <Popconfirm
                             title="Delete"
                             description="Are you sure to delete this product?"
-                            open={deletePopup}
                             onConfirm={() => {
                                 deleteHandler(record);
                             }}
                             okButtonProps={{ loading: isLoading }}
-                            onCancel={(e) => {
-                                setDeletePopup(false);
-                            }}
                         >
                             <Button
-                                onClick={(e) => {
-                                    setDeletePopup(true);
-                                }}
                                 type="primary"
                                 danger
                                 icon={<DeleteOutlined />}

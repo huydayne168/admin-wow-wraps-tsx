@@ -15,20 +15,18 @@ import { Checkout } from "../../models/checkout";
 import { useAppDispatch } from "../../hooks/useStore";
 import { useNavigate } from "react-router-dom";
 import { navigationActions } from "../../store/store";
-const DashboardHeader: React.FC<{ checkouts: Checkout[] }> = ({
-    checkouts,
-}) => {
+const DashboardHeader: React.FC<{}> = ({}) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const privateHttp = usePrivateHttp();
     const [users, setUsers] = useState<User[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
+    const [checkouts, setCheckouts] = useState<Checkout[]>([]);
     useEffect(() => {
         const getUsers = async () => {
             try {
                 const res = await privateHttp.get("/user/get-users", {
                     params: {
-                        page: 1,
                         sortRole: "user",
                     },
                 });
@@ -50,7 +48,6 @@ const DashboardHeader: React.FC<{ checkouts: Checkout[] }> = ({
                         "/api/product/get-products",
                     {
                         params: {
-                            page: 1,
                             category: "All",
                         },
                     }
@@ -63,9 +60,31 @@ const DashboardHeader: React.FC<{ checkouts: Checkout[] }> = ({
         getAllProducts();
     }, []);
 
+    // get all checkouts
+    useEffect(() => {
+        const getCheckouts = async () => {
+            try {
+                const res = await privateHttp.get(
+                    "/api/checkout/get-checkouts",
+                    {
+                        params: {
+                            sortDate: "true",
+                        },
+                    }
+                );
+                console.log(res);
+                setCheckouts(res.data.checkouts);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        getCheckouts();
+    }, []);
+
     const earning = useMemo(() => {
         return checkouts
-            .filter((checkout) => checkout.status.toLowerCase() === "done")
+            .filter((checkout) => checkout.status.toLowerCase() === "paid")
             .reduce((init, checkout) => init + Number(checkout.total), 0);
     }, [checkouts]);
 
@@ -122,7 +141,7 @@ const DashboardHeader: React.FC<{ checkouts: Checkout[] }> = ({
             >
                 <div className="card-body">
                     <h5 className="card-title">Earning</h5>
-                    <p className="card-text fs-2">{earning}</p>
+                    <p className="card-text fs-2">${earning.toFixed(2)}</p>
                     <FontAwesomeIcon
                         style={{
                             backgroundColor: "#cce6cc",

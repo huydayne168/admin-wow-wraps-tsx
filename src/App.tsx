@@ -15,6 +15,10 @@ import EditProduct from "./Components/EditProduct/EditProduct";
 import TagsAndCategories from "./Components/TagsAndCategories/TagsAndCategories";
 import ErrorPage from "./Components/error/ErrorPage";
 import UserInfo from "./Components/users/UserInfo";
+import AddFlashSale from "./Components/AddFlashSale/AddFlashSale";
+import FlashSales from "./Components/FlashSales/FlashSales";
+import AddVoucher from "./Components/AddVoucher/AddVoucher";
+import Vouchers from "./Components/Vouchers/Vouchers";
 function App() {
     const router = createBrowserRouter([
         {
@@ -71,6 +75,25 @@ function App() {
                 {
                     path: "edit-product/:productId",
                     element: <EditProduct />,
+                },
+                {
+                    path: "flash-sales",
+                    element: <FlashSales />,
+                },
+
+                {
+                    path: "add-flashSale",
+                    element: <AddFlashSale />,
+                },
+
+                {
+                    path: "vouchers",
+                    element: <Vouchers />,
+                },
+
+                {
+                    path: "add-voucher",
+                    element: <AddVoucher />,
                 },
             ],
         },

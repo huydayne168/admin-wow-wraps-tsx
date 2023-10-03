@@ -35,7 +35,6 @@ const Users: React.FC<{}> = () => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const [sortRole, setSortRole] = useState("");
-    const [deletePopup, setDeletePopup] = useState(false);
 
     // by default set search params category=All and page = 1
     useEffect(() => {
@@ -73,6 +72,7 @@ const Users: React.FC<{}> = () => {
 
         getUsers();
     }, [search]);
+    console.log(users);
 
     // Column type:
     type DataIndex = keyof User;
@@ -222,19 +222,12 @@ const Users: React.FC<{}> = () => {
                         <Popconfirm
                             title="Delete"
                             description="Are you sure to delete this product?"
-                            open={deletePopup}
                             onConfirm={() => {
                                 // deleteHandler(record._id);
                             }}
                             okButtonProps={{ loading: isLoading }}
-                            onCancel={(e) => {
-                                setDeletePopup(false);
-                            }}
                         >
                             <Button
-                                onClick={(e) => {
-                                    setDeletePopup(true);
-                                }}
                                 type="primary"
                                 danger
                                 icon={<DeleteOutlined />}

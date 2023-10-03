@@ -18,7 +18,7 @@ const TagsAndCategories: React.FC<{}> = () => {
                         type === "categories" ? styles["nav-active"] : ""
                     }`}
                     onClick={() => {
-                        navigate("/admin/categories");
+                        navigate("/admin/tagsCategories/categories");
                     }}
                 >
                     Category
@@ -26,7 +26,7 @@ const TagsAndCategories: React.FC<{}> = () => {
                 <li
                     className={`${type === "tags" ? styles["nav-active"] : ""}`}
                     onClick={() => {
-                        navigate("/admin/tags");
+                        navigate("/admin/tagsCategories/tags");
                     }}
                 >
                     Tag

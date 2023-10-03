@@ -32,13 +32,6 @@
     align-items: center;
 }
 
-.product-description {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
 .pagination {
     margin-top: 32px;
     display: flex;

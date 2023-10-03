@@ -3,15 +3,18 @@ import styles from "./dashboard.module.css";
 
 import DashboardHeader from "./DashboardHeader";
 import DashboardTable from "./DashboardTable";
-import { useAppSelector } from "../../hooks/useStore";
+import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
 import { Checkout } from "../../models/checkout";
 import usePrivateHttp from "../../hooks/usePrivateHttp";
+import http from "../../utils/http";
 function DashBoard() {
     const privateHttp = usePrivateHttp();
     const currentUser = useAppSelector((state) => state.authentication);
+    const products = useAppSelector((state) => state.products);
+    const dispatch = useAppDispatch();
     const [checkouts, setCheckouts] = useState<Checkout[]>([]);
 
-    // get all products
+    // get latest checkouts
     useEffect(() => {
         const getCheckouts = async () => {
             try {
@@ -20,7 +23,7 @@ function DashBoard() {
                     {
                         params: {
                             page: 1,
-                            sortTime: "true",
+                            sortDate: "true",
                         },
                     }
                 );
@@ -35,7 +38,7 @@ function DashBoard() {
     }, []);
     return (
         <div className={styles.dashboard}>
-            <DashboardHeader checkouts={checkouts} />
+            <DashboardHeader />
             <DashboardTable checkouts={checkouts} />
         </div>
     );

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import ProductForm from "../ProductForm/ProductForm";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Product } from "../../models/product";
@@ -11,6 +11,7 @@ const EditProduct: React.FC<{}> = () => {
     const dispatch = useAppDispatch();
     const privateHttp = usePrivateHttp();
     const navigate = useNavigate();
+    const [errMess, setErrMess] = useState(false);
     const editProductHandler = useCallback(async (product: Product) => {
         const {
             _id,
@@ -36,7 +37,7 @@ const EditProduct: React.FC<{}> = () => {
                     price,
                     shortDescription,
                     longDescription,
-                    tags,
+                    tags: tags.map((tag) => tag._id),
                     image,
                 }
             );
@@ -46,10 +47,16 @@ const EditProduct: React.FC<{}> = () => {
             });
         } catch (error) {
             console.log(error);
+            dispatch(loadingActions.setLoading(false));
+            setErrMess(true);
         }
     }, []);
     return (
-        <ProductForm product={product} handleProductFn={editProductHandler} />
+        <ProductForm
+            errMess={errMess}
+            product={product}
+            handleProductFn={editProductHandler}
+        />
     );
 };
 
