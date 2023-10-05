@@ -40,6 +40,8 @@ const FlashSales: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalFlashSale, setTotalFlashSale] = useState(0);
 
+    const [isDeleting, setIsDeleting] = useState(false);
+
     // change page with ant pagination
     const onChangePagination: PaginationProps["onChange"] = useCallback(
         (page: number) => {
@@ -57,7 +59,7 @@ const FlashSales: React.FC = () => {
         });
     }, [currentPage]);
 
-    // get products from database:
+    // get flash sales from database:
     useEffect(() => {
         const getAllProducts = async () => {
             dispatch(loadingActions.setLoading(true));
@@ -77,7 +79,7 @@ const FlashSales: React.FC = () => {
             }
         };
         getAllProducts();
-    }, [search]);
+    }, [search, isDeleting]);
 
     // delete flash sale handler:
     const deleteHandler = useCallback(
@@ -93,6 +95,7 @@ const FlashSales: React.FC = () => {
                     return pre.filter((fs) => fs._id !== flashSale._id);
                 });
                 dispatch(loadingActions.setLoading(false));
+                setIsDeleting((pre) => !pre);
             } catch (error) {
                 console.log(error);
                 dispatch(loadingActions.setLoading(false));

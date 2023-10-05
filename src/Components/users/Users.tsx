@@ -219,20 +219,6 @@ const Users: React.FC<{}> = () => {
                                 });
                             }}
                         />
-                        <Popconfirm
-                            title="Delete"
-                            description="Are you sure to delete this product?"
-                            onConfirm={() => {
-                                // deleteHandler(record._id);
-                            }}
-                            okButtonProps={{ loading: isLoading }}
-                        >
-                            <Button
-                                type="primary"
-                                danger
-                                icon={<DeleteOutlined />}
-                            />
-                        </Popconfirm>
                     </div>
                 );
             },

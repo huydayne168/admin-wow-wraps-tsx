@@ -22,9 +22,10 @@ function Transactions() {
     const checkouts = useAppSelector((state) => state.checkouts);
     const dispatch = useAppDispatch();
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalProducts, setTotalProducts] = useState(0);
+    const [totalCheckouts, setTotalCheckouts] = useState(0);
     const [selectCheckout, setSelectCheckout] = useState<Checkout | null>(null);
     const [openDetailPopup, setOpenDetailPopup] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const isLoading = useAppSelector((state) => state.loading);
     const [search, setSearch] = useSearchParams();
     const privateHttp = usePrivateHttp();
@@ -60,13 +61,14 @@ function Transactions() {
                 console.log(res);
                 dispatch(loadingActions.setLoading(false));
                 dispatch(checkoutsAction.setCheckouts(res.data.checkouts));
+                setTotalCheckouts(res.data.totalCheckouts);
             } catch (error) {
                 console.log(error);
             }
         };
 
         getCheckouts();
-    }, [search]);
+    }, [search, isDeleting]);
 
     // update checkout status handler:
     const updateHandler = useCallback(
@@ -91,6 +93,8 @@ function Transactions() {
 
     // delete checkout handler:
     const deleteHandler = useCallback(async (checkoutId: string) => {
+        console.log(checkoutId);
+
         dispatch(loadingActions.setLoading(true));
         try {
             const res = await privateHttp.delete(
@@ -102,6 +106,7 @@ function Transactions() {
             console.log(res);
             dispatch(checkoutsAction.deleteCheckout(checkoutId));
             dispatch(loadingActions.setLoading(false));
+            setIsDeleting((pre) => !pre);
         } catch (error) {
             console.log(error);
         }
@@ -441,13 +446,13 @@ function Transactions() {
                             type="primary"
                             ghost
                             onClick={() => {
-                                search.set("sortStatus", "done");
+                                search.set("sortStatus", "PAID");
                                 setSearch(search, {
                                     replace: true,
                                 });
                             }}
                         >
-                            Done
+                            PAID
                         </Button>
 
                         <Button
@@ -474,7 +479,7 @@ function Transactions() {
                             danger
                             ghost
                             onClick={() => {
-                                search.set("sortStatus", "cancel");
+                                search.set("sortStatus", "canceled");
                                 setSearch(search, {
                                     replace: true,
                                 });
@@ -557,7 +562,7 @@ function Transactions() {
                     <Pagination
                         current={currentPage}
                         onChange={onChangePagination}
-                        total={totalProducts}
+                        total={totalCheckouts}
                         pageSize={5}
                         style={{ margin: "auto" }}
                     />

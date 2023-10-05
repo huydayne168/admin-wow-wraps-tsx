@@ -40,6 +40,8 @@ const Vouchers: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalVouchers, setTotalVouchers] = useState(0);
 
+    const [isDeleting, setIsDeleting] = useState(false);
+
     // change page with ant pagination
     const onChangePagination: PaginationProps["onChange"] = useCallback(
         (page: number) => {
@@ -57,7 +59,7 @@ const Vouchers: React.FC = () => {
         });
     }, [currentPage]);
 
-    // get products from database:
+    // get vouchers from database:
     useEffect(() => {
         const getAllVouchers = async () => {
             dispatch(loadingActions.setLoading(true));
@@ -78,7 +80,7 @@ const Vouchers: React.FC = () => {
             }
         };
         getAllVouchers();
-    }, [search]);
+    }, [search, isDeleting]);
 
     // delete flash sale handler:
     const deleteHandler = useCallback(
@@ -99,6 +101,7 @@ const Vouchers: React.FC = () => {
                     );
                 });
                 dispatch(loadingActions.setLoading(false));
+                setIsDeleting((pre) => !pre);
             } catch (error) {
                 console.log(error);
                 dispatch(loadingActions.setLoading(false));
@@ -156,7 +159,7 @@ const Vouchers: React.FC = () => {
             },
         },
         {
-            title: "Quantity",
+            title: "Remain",
             dataIndex: "quantity",
             key: "quantity",
             width: "10%",
@@ -227,8 +230,77 @@ const Vouchers: React.FC = () => {
         },
 
         {
+            title: "Status",
+            dataIndex: "isActive",
+            key: "isActive",
+            width: "10%",
+            render: (isActive) => {
+                return (
+                    <span>
+                        {isActive ? (
+                            <Tag color="success">Active</Tag>
+                        ) : (
+                            <Tag>Not Available</Tag>
+                        )}
+                    </span>
+                );
+            },
+            filterDropdown: ({}) => {
+                return (
+                    <div
+                        style={{
+                            padding: "4px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "4px",
+                        }}
+                        onKeyDown={(e) => e.stopPropagation()}
+                    >
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.delete("sortActive");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            Default
+                        </div>
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.set("sortActive", "true");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            Active
+                        </div>
+
+                        <div
+                            className={styles["dropdown-item"]}
+                            onClick={() => {
+                                search.set("sortActive", "false");
+                                setSearch(search, {
+                                    replace: true,
+                                });
+                            }}
+                        >
+                            Not Available
+                        </div>
+                    </div>
+                );
+            },
+            filterIcon: () => {
+                return <CaretDownOutlined />;
+            },
+        },
+
+        {
             title: "Actions",
-            width: "30%",
+            width: "8%",
             render: (_, record) => {
                 return (
                     <div style={{ display: "flex", gap: "4px" }}>
@@ -264,7 +336,7 @@ const Vouchers: React.FC = () => {
                 <button
                     onClick={(e) => {
                         e.preventDefault();
-                        navigate("/admin/add-flashSale");
+                        navigate("/admin/add-voucher");
                         dispatch(
                             navigationActions.setNavigationState("add-product")
                         );

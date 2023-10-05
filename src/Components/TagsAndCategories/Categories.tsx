@@ -2,10 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import TagsAndCategoriesForm from "./TagsAndCategoriesForm";
 import usePrivateHttp from "../../hooks/usePrivateHttp";
 import { useSearchParams } from "react-router-dom";
+import { AxiosError } from "axios";
 const Categories: React.FC<{}> = () => {
     const privateHttp = usePrivateHttp();
     const [search, setSearch] = useSearchParams();
     const [categories, setCategories] = useState<string[]>([]);
+    const [deleteErr, setDeleteErr] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     // get all categories:
     useEffect(() => {
         const getAllCategories = async () => {
@@ -61,19 +64,27 @@ const Categories: React.FC<{}> = () => {
                     "/api/category/delete-category",
                     {
                         params: {
-                            category,
+                            categoryId: category._id,
                         },
                     }
                 );
                 console.log(res);
-
+                setIsDeleting((pre) => !pre);
                 setCategories((pre: any) => {
                     return pre.filter(
-                        (_category: any) => _category !== category
+                        (_category: any) => _category._id !== category._id
                     );
                 });
             } catch (error) {
                 console.log(error);
+                if (error instanceof AxiosError) {
+                    if (error.response?.status == 409) {
+                        setDeleteErr(true);
+                        setTimeout(() => {
+                            setDeleteErr(false);
+                        }, 3000);
+                    }
+                }
             }
         },
         [privateHttp]
@@ -90,7 +101,7 @@ const Categories: React.FC<{}> = () => {
                 );
                 console.log(res);
                 setCategories((pre: any) => {
-                    return [...pre, category];
+                    return [...pre, { name: category }];
                 });
             } catch (error) {
                 console.log(error);
@@ -106,6 +117,7 @@ const Categories: React.FC<{}> = () => {
             deleteFn={deleteCategory}
             addFn={addCategory}
             searchFn={getCategories}
+            deleteErr={deleteErr}
         />
     );
 };

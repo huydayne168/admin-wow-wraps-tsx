@@ -12,6 +12,7 @@ const EditProduct: React.FC<{}> = () => {
     const privateHttp = usePrivateHttp();
     const navigate = useNavigate();
     const [errMess, setErrMess] = useState(false);
+    // edit handler
     const editProductHandler = useCallback(async (product: Product) => {
         const {
             _id,
@@ -32,7 +33,7 @@ const EditProduct: React.FC<{}> = () => {
                 {
                     _id,
                     name,
-                    category,
+                    category: category._id,
                     amount,
                     price,
                     shortDescription,

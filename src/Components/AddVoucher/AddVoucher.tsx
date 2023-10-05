@@ -14,6 +14,7 @@ const AddVoucher: React.FC<{}> = () => {
     const navigate = useNavigate();
     const privateHttp = usePrivateHttp();
     const [errMess, setErrMess] = useState(false);
+    const [duplicateErrMess, setDuplicateErrMess] = useState(false);
     const [formData, setFormData] = useState({
         code: "",
         discountPercent: null,
@@ -65,12 +66,12 @@ const AddVoucher: React.FC<{}> = () => {
             });
         }
     };
-    console.log(formData.end);
 
     // send flash sale data to server:
     const submitHandler = useCallback(async () => {
         window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
         try {
+            setDuplicateErrMess(false);
             const res = await privateHttp.post("/api/voucher/add-voucher", {
                 code: formData.code,
                 discountPercent: formData.discountPercent,
@@ -83,6 +84,8 @@ const AddVoucher: React.FC<{}> = () => {
             if (error instanceof AxiosError) {
                 if (error.response?.status === 422) {
                     setErrMess(true);
+                } else if (error.response?.status === 409) {
+                    setDuplicateErrMess(true);
                 }
             }
             console.log(error);
@@ -106,6 +109,13 @@ const AddVoucher: React.FC<{}> = () => {
                     layout="vertical"
                     style={{ maxWidth: "100%" }}
                 >
+                    {duplicateErrMess && (
+                        <Alert
+                            type="error"
+                            style={{ color: "red" }}
+                            message="Duplicate voucher code!"
+                        />
+                    )}
                     <Form.Item label={"Code"}>
                         <Input
                             size="large"
@@ -116,6 +126,7 @@ const AddVoucher: React.FC<{}> = () => {
                             required
                         />
                     </Form.Item>
+
                     <Form.Item label={"Discount %"}>
                         <InputNumber
                             onChange={(e) => {

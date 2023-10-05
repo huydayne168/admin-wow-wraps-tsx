@@ -5,5 +5,6 @@ export type Voucher = {
     code: string;
     discountPercent: number;
     quantity: number;
+    isActive: boolean;
     end: string;
 };

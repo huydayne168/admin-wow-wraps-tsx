@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styles from "./TagsAndCategoriesForm.module.css";
+import { Alert } from "antd";
 
 const TagsAndCategoriesForm: React.FC<{
     type: string;
@@ -7,7 +8,8 @@ const TagsAndCategoriesForm: React.FC<{
     deleteFn: Function;
     addFn: Function;
     searchFn: Function;
-}> = ({ type, listItems, deleteFn, addFn, searchFn }) => {
+    deleteErr?: boolean;
+}> = ({ type, listItems, deleteFn, addFn, searchFn, deleteErr }) => {
     const [inputValue, setInputValue] = useState("");
     const [addErr, setAddErr] = useState(false);
 
@@ -41,7 +43,8 @@ const TagsAndCategoriesForm: React.FC<{
                         listItems.length === 0 ||
                         !listItems.some(
                             (item: any) =>
-                                item.toLowerCase() === inputValue.toLowerCase()
+                                item.name.toLowerCase() ===
+                                inputValue.toLowerCase()
                         )
                     ) {
                         addFn(inputValue);
@@ -52,7 +55,13 @@ const TagsAndCategoriesForm: React.FC<{
             >
                 Add
             </button>
-
+            {deleteErr && (
+                <Alert
+                    type="error"
+                    message="This category has products.Can not delete!!!"
+                    style={{ color: "red" }}
+                />
+            )}
             <table className="table table-hover">
                 <thead className="table-light">
                     <tr>

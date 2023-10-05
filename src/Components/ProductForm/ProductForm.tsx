@@ -33,6 +33,8 @@ const ProductForm: React.FC<{
             name: "",
         }
     );
+    console.log(category);
+
     const [amount, setAmount] = useState(product?.amount || "");
     const [price, setPrice] = useState(product?.price || "");
     const [shortDescription, setShortDescription] = useState(
@@ -149,21 +151,40 @@ const ProductForm: React.FC<{
                             id="category"
                             className="form-select"
                             onChange={(e) => {
-                                setCategory(JSON.parse(e.target.value));
+                                setCategory(
+                                    categoriesList.filter(
+                                        (c) => c._id === e.target.value
+                                    )[0]
+                                );
                             }}
+                            defaultValue={category._id}
                         >
-                            <option value={""} disabled>
-                                --Choose food category--
-                            </option>
-
+                            {category._id ? (
+                                <option value={category._id}>
+                                    {category.name}
+                                </option>
+                            ) : (
+                                <option value={""} hidden>
+                                    --Choose food category--
+                                </option>
+                            )}
                             {categoriesList[0] &&
-                                categoriesList.map((category) => {
+                                categoriesList.map((_category) => {
+                                    console.log(
+                                        JSON.stringify(category) ===
+                                            JSON.stringify(_category),
+                                        _category.name
+                                    );
+
                                     return (
                                         <option
-                                            key={category.name}
-                                            value={JSON.stringify(category)}
+                                            hidden={
+                                                category._id === _category._id
+                                            }
+                                            key={_category.name}
+                                            value={_category._id}
                                         >
-                                            {category.name}
+                                            {_category.name}
                                         </option>
                                     );
                                 })}
@@ -309,7 +330,7 @@ const ProductForm: React.FC<{
                             handleProductFn({
                                 _id: product?._id,
                                 name,
-                                category: category._id,
+                                category: category,
                                 amount,
                                 price,
                                 shortDescription,

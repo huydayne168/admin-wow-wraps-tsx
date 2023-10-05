@@ -1,28 +1,79 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./product-detail.module.css";
 import { Product } from "../../models/product";
 import { useLocation, useNavigate } from "react-router-dom";
+import { List, Avatar } from "antd";
+import { Review } from "../../models/review";
+import http from "../../utils/http";
 const ProductDetail: React.FC<{}> = () => {
     const location = useLocation();
     const product: Product = location.state.product;
-    console.log(product.tags);
-
+    console.log(product.reviews);
     const navigate = useNavigate();
+    const [productReviews, setProductReviews] = useState<Review[]>();
+    // get all products reviews :
+    useEffect(() => {
+        const getProductReviews = async function () {
+            try {
+                const res = await http.get(
+                    process.env.REACT_APP_SERVER_DOMAIN +
+                        "/api/product/get-reviews",
+                    {
+                        params: {
+                            productId: product._id,
+                        },
+                    }
+                );
+                setProductReviews(res.data);
+                console.log(res.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        getProductReviews();
+    }, []);
+
+    console.log(product.reviews);
+
     return (
         <div className={styles["product-detail"]}>
             <div className={styles["left"]}>
                 <img src={product.image} alt={product.name} />
                 <ul className={styles["reviews"]}>
                     Reviews:
-                    {product.reviews?.length > 0 ? (
-                        product.reviews.map((review) => {
-                            return (
-                                <li>
-                                    <div>{review.rate}</div>
-                                    <div>{review.reviewContent}</div>
-                                </li>
-                            );
-                        })
+                    {productReviews && productReviews.length > 0 ? (
+                        <List
+                            className={styles["reviews-list"]}
+                            itemLayout="horizontal"
+                            dataSource={productReviews}
+                            renderItem={(item, index) => (
+                                <List.Item>
+                                    <List.Item.Meta
+                                        avatar={
+                                            <Avatar
+                                                style={{
+                                                    backgroundColor: "#fb8f2c",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
+                                                {
+                                                    item.user.userName.toUpperCase()[0]
+                                                }
+                                            </Avatar>
+                                        }
+                                        title={item.user.userName}
+                                        description={
+                                            <>
+                                                <strong>
+                                                    {item.ratePoint} stars
+                                                </strong>
+                                                -<span> {item.comment}</span>
+                                            </>
+                                        }
+                                    />
+                                </List.Item>
+                            )}
+                        />
                     ) : (
                         <li>No review</li>
                     )}

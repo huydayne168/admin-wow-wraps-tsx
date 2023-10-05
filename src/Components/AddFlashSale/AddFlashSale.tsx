@@ -23,6 +23,8 @@ import Pagination from "antd/es/pagination";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { productsAction } from "../../store/store";
 import usePrivateHttp from "../../hooks/usePrivateHttp";
+import { Product } from "../../models/product";
+import { FlashSale } from "../../models/flashsale";
 const { RangePicker } = DatePicker;
 const AddFlashSale: React.FC<{}> = () => {
     const products = useAppSelector((state) => state.products);
@@ -34,7 +36,9 @@ const AddFlashSale: React.FC<{}> = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [checkAll, setCheckAll] = useState(true);
     const [errMess, setErrMess] = useState(false);
-    const [formData, setFormData] = useState({
+    const [chooseProductErr, setChooseProductErr] = useState(false);
+    const [formData, setFormData] = useState<FlashSale>({
+        _id: "",
         name: "",
         discountPercent: 0,
         start: "",
@@ -52,19 +56,22 @@ const AddFlashSale: React.FC<{}> = () => {
                     process.env.REACT_APP_SERVER_DOMAIN +
                         "/api/product/get-products",
                     {
-                        params: search || null,
+                        params: {
+                            sortFlashSale: "false",
+                        },
                     }
                 );
                 console.log(res.data);
 
-                if (res.data.isLastPage) {
-                    dispatch(productsAction.setProducts(res.data.products));
-                } else {
-                    dispatch(productsAction.setProducts(res.data.products));
+                dispatch(productsAction.setProducts(res.data.products));
+                if (!res.data.products[0]) {
+                    setChooseProductErr(true);
                 }
-                setTotalProducts(res.data.totalProducts);
                 setFormData((pre) => {
-                    return { ...pre, products: res.data.products };
+                    return {
+                        ...pre,
+                        products: res.data.products,
+                    };
                 });
             } catch (error) {
                 console.log(error);
@@ -279,7 +286,6 @@ const AddFlashSale: React.FC<{}> = () => {
                                             }
                                         />
                                         <Checkbox
-                                            disabled={checkAll}
                                             indeterminate={checkAll}
                                             onChange={(e) => {
                                                 checkProductHandler(
@@ -293,6 +299,13 @@ const AddFlashSale: React.FC<{}> = () => {
                             )}
                         />
                     </Form.Item>
+                    {!formData.products[0] && chooseProductErr && (
+                        <Alert
+                            type="error"
+                            message="All products are now on a flash sale"
+                            style={{ color: "red", marginBottom: "12px" }}
+                        />
+                    )}
                     <Form.Item>
                         <Button
                             type="primary"

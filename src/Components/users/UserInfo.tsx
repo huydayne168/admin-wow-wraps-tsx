@@ -61,6 +61,7 @@ const UserInfo: React.FC = () => {
             children: userInfo.email,
         },
     ];
+    console.log(userCheckouts);
 
     return (
         <Fragment>

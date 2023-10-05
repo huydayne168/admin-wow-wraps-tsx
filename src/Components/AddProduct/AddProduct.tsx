@@ -31,7 +31,7 @@ const AddProduct: React.FC = () => {
                 "/api/product/add-product",
                 {
                     name,
-                    category,
+                    category: category._id,
                     amount,
                     price,
                     shortDescription,

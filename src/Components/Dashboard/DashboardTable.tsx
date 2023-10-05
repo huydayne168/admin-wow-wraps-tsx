@@ -16,12 +16,12 @@ const DashboardTable: React.FC<{ checkouts: Checkout[] }> = ({ checkouts }) => {
             width: "28%",
         },
         {
-            title: "User",
-            dataIndex: "user",
-            key: "user",
+            title: "Receiver Name",
+            dataIndex: "receiverName",
+            key: "receiverName",
             width: "15%",
-            render: (user) => {
-                return <div>{user.userName}</div>;
+            render: (receiverName) => {
+                return <div>{receiverName}</div>;
             },
         },
         {

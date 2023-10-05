@@ -8,6 +8,7 @@ const Tags: React.FC<{}> = () => {
     const [search, setSearch] = useSearchParams();
 
     const [tags, setTags] = useState<any>([]);
+    const [isDeleting, setIsDeleting] = useState(false);
     // get all categories:
     useEffect(() => {
         const getAllTags = async () => {
@@ -47,7 +48,7 @@ const Tags: React.FC<{}> = () => {
                 console.log(error);
             }
         },
-        [privateHttp, search, setSearch]
+        [privateHttp, search, setSearch, isDeleting]
     );
 
     const deleteTag = useCallback(async (tag: any) => {
@@ -58,7 +59,7 @@ const Tags: React.FC<{}> = () => {
                 },
             });
             console.log(res);
-
+            setIsDeleting((pre) => !pre);
             setTags((pre: any) => {
                 return pre.filter((_tag: any) => _tag !== tag);
             });
@@ -76,7 +77,7 @@ const Tags: React.FC<{}> = () => {
                 console.log(res);
 
                 setTags((pre: any) => {
-                    return [...pre, tag];
+                    return [...pre, { name: tag }];
                 });
             }
         } catch (error) {

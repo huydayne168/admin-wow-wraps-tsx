@@ -1,5 +1,6 @@
 import { type } from "os";
 import { Review } from "./review";
+import { FlashSale } from "./flashsale";
 export type Product = {
     name: string;
     _id: string;
@@ -19,5 +20,7 @@ export type Product = {
         }
     ];
     reviews: Review[];
+    flashSale: FlashSale[];
+    salePrice: number | null;
     image: any;
 };

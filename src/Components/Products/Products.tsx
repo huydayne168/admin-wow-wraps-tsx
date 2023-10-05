@@ -23,6 +23,8 @@ import { Input, Table, Button, Dropdown, Tag, Alert } from "antd";
 import type { PaginationProps } from "antd";
 import Pagination from "antd/es/pagination";
 import { AutoComplete, Popconfirm } from "antd";
+import { Category } from "../../models/category";
+import Categories from "../TagsAndCategories/Categories";
 // import DeletePopup from "../DeletePopup/DeletePopup";
 const Products: React.FC = () => {
     const navigate = useNavigate();
@@ -34,7 +36,7 @@ const Products: React.FC = () => {
     // get products from store:
     const products = useAppSelector((state) => state.products);
     // categories list:
-    const [categoriesList, setCategoriesList] = useState<string[]>([]);
+    const [categoriesList, setCategoriesList] = useState<Category[]>([]);
 
     // search params:
     const [search, setSearch] = useSearchParams();
@@ -42,6 +44,8 @@ const Products: React.FC = () => {
     // set page pagination:
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalProducts, setTotalProducts] = useState(0);
+
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // set delete popup:
 
@@ -53,6 +57,7 @@ const Products: React.FC = () => {
         const fetchCategories = async () => {
             const res = await privateHttp.get("/api/category/get-categories");
             console.log(res);
+
             setCategoriesList(res.data);
         };
 
@@ -62,11 +67,10 @@ const Products: React.FC = () => {
     // category drop down options:
     const categoriesDropdownOptions = [
         { value: "All" },
-        ...categoriesList.map((category) => ({
-            value: category,
+        ...categoriesList.map((category: any) => ({
+            value: category.name,
         })),
     ];
-    console.log(categoriesDropdownOptions);
 
     // change page with ant pagination
     const onChangePagination: PaginationProps["onChange"] = useCallback(
@@ -113,7 +117,7 @@ const Products: React.FC = () => {
             }
         };
         getAllProducts();
-    }, [search]);
+    }, [search, isDeleting]);
 
     // delete product:
     const deleteHandler = useCallback(
@@ -131,6 +135,7 @@ const Products: React.FC = () => {
 
                 dispatch(productsAction.deleteProduct(product._id));
                 dispatch(loadingActions.setLoading(false));
+                setIsDeleting((pre) => !pre);
             } catch (error) {
                 console.log(error);
                 setDeleteFailState(true);
@@ -359,8 +364,6 @@ const Products: React.FC = () => {
                 return (
                     <AutoComplete
                         style={{
-                            // position: "absolute",
-                            // top: "-80px",
                             width: "100%",
                         }}
                         placeholder={"search category here"}
@@ -372,10 +375,13 @@ const Products: React.FC = () => {
                         }
                         onSelect={(value, option) => {
                             console.log(option);
-                            if (value === "") {
+                            if (value === "All") {
                                 search.delete("category");
                             } else {
-                                search.set("category", value);
+                                const cateId = categoriesList.filter(
+                                    (c) => c.name === value
+                                )[0]._id;
+                                search.set("category", cateId);
                             }
                             setSearch(search, {
                                 replace: true,
