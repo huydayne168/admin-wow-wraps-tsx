@@ -1,7 +1,10 @@
 import http from "../utils/http";
 import { useAppDispatch } from "./useStore";
 import { authActions } from "../store/store";
+import { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 const useRefreshToken = () => {
+    const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const refresh = async function () {
         try {
@@ -18,6 +21,13 @@ const useRefreshToken = () => {
             return response.data.accessToken;
         } catch (error) {
             console.log(error);
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 403 || 401) {
+                    navigate("/");
+                } else if (error.request) {
+                    navigate("/");
+                }
+            }
         }
     };
 
