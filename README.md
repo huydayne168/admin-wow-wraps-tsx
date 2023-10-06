@@ -1,46 +1,64 @@
-# Getting Started with Create React App
+# `WOW WRAPS ADMIN UI`:
+## `About WOW WRAPS`:
+WOW WRAPS is a food odering website:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+-It has client and admin website
 
-## Available Scripts
+-Allow customer to order food, search for foods, read blogs,...
 
-In the project directory, you can run:
+-Allow admin to manage users, foods, flashsales, vouchers,...
 
-### `npm start`
+## `ADMIN`:
+### This is the page for the admin of WOW WRAPS:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Features: 
+*Now available:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+-Add, Delete, Edit, Manage products
 
-### `npm test`
+-Add, Delete, Edit, Manage checkouts
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+-Add, Delete, Edit, Manage tags and categories
 
-### `npm run build`
+-Manage users
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+-Create, Manage Flashsales
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+-Create, Manage Vouchers
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+-Login, Sign up, Log out
 
-### `npm run eject`
+-Send emails
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+-...
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+*In developing:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+-Edit Vouchers, Flash Sales
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+-Add, Delete, Edit reserved table
 
-## Learn More
+-Chat to consult about products for users
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+-...
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## `You can visit my admin page here:`
+
+admin page: https://admin-wow-wraps-tsx.vercel.app/
+
+you can use this acount here to <em>log in</em> as an admin:
+
+email: huynguyenviet1608@gmail.com
+
+password: 12345678
+
+or you can sign up with the `secret key`:  ADMIN_SECRET_16082003
+
+## You can see the 2 another part of this WOW WRAPS:
+
+user: https://github.com/huydayne168/client-wow-wraps-tsx
+
+backend: https://github.com/huydayne168/wow-wraps-backend
+
+Thank you! Want to see my CV? here: https://huydayne168.github.io/myWebCV/
+
