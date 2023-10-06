@@ -62,7 +62,7 @@ Or you can SIGN UP with the `secret key`:  `ADMIN_SECRET_16082003`
 
 ## You can see the 2 another parts of this WOW WRAPS:
 
-user: https://github.com/huydayne168/client-wow-wraps-tsx
+client: https://github.com/huydayne168/client-wow-wraps-tsx
 
 backend: https://github.com/huydayne168/wow-wraps-backend
 
