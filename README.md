@@ -60,7 +60,7 @@ You can use this acount here to LOG IN as an admin:
 
 Or you can SIGN UP with the `secret key`:  `ADMIN_SECRET_16082003`
 
-`Note`: In the Voucher part, if you want to use a voucher you have to get the voucher code from admin page (Beacause I have not do the sending voucher to user feature :vvv)
+`Note`: In the Voucher part, if you want to use a voucher you have to get the voucher code from admin page (Beacause I have not done the sending voucher to user feature :vvv)
 
 ## You can see the 2 another parts of this WOW WRAPS:
 
