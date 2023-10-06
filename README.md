@@ -11,6 +11,11 @@
 ## `ADMIN`:
 ### This is the page for the admin of WOW WRAPS:
 
+Techstacks:
+
+<img src="https://oneteamsolutions.in/blogoneteam/wp-content/uploads/2020/05/REACT-JS-KOCHI.png" height=50 width= auto/> <img src= "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/1200px-Typescript_logo_2020.svg.png" height=50 width= auto/> <img src="https://reactrouter.com/_brand/react-router-stacked-color.png" height=50 width= auto/> <img src="https://i0.wp.com/programmingwithmosh.com/wp-content/uploads/2020/02/reduxlogo.png?ssl=1" height=50 width= auto/> <img src="https://iconape.com/wp-content/files/ro/370540/svg/ant-design-logo-icon-png-svg.png" height=50 width= auto/>
+
+
 Features: 
 
 `Now available`:
