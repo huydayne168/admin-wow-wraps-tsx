@@ -246,10 +246,7 @@ const SignUp: React.FC<{}> = () => {
                     ) : (
                         ""
                     )}
-                    <p>
-                        Already have an admin account?{" "}
-                        <Link to={"/"}>Log in</Link>
-                    </p>
+
                     <button
                         type="button"
                         className={`${styles.logInBtn} btn btn-primary btn-lg`}
@@ -260,6 +257,10 @@ const SignUp: React.FC<{}> = () => {
                     >
                         Sign up
                     </button>
+                    <p>
+                        Already have an admin account?{" "}
+                        <Link to={"/"}>Log in</Link>
+                    </p>
                 </div>
             </div>
         </div>

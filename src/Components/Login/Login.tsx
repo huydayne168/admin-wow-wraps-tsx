@@ -100,10 +100,7 @@ function Login() {
                     ) : (
                         ""
                     )}
-                    <p className="mt-2">
-                        Sign up to be an admin?{" "}
-                        <Link to={"/sign-up"}>Sign up</Link>
-                    </p>
+
                     <button
                         type="button"
                         className={`${styles.logInBtn} btn btn-primary btn-lg`}
@@ -111,6 +108,10 @@ function Login() {
                     >
                         Log in
                     </button>
+                    <p className="mt-2">
+                        Sign up to be an admin?{" "}
+                        <Link to={"/sign-up"}>Sign up</Link>
+                    </p>
                 </div>
             </div>
         </div>
